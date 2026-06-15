@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { ArrowUpRight, Dumbbell, Home, Leaf, ShoppingBag, Newspaper, Utensils, Waves, X } from 'lucide-react';
 
@@ -13,6 +13,15 @@ const sites = [
 ];
 
 const byId = Object.fromEntries(sites.map((s) => [s.id, s]));
+const PulseForgeWalkthrough = lazy(() => import('./PulseForgeWalkthrough.jsx'));
+const pulseWalkthroughBeats = [
+  ['Entrance', 'Branded reception'],
+  ['Turf', 'Sled lane'],
+  ['Strength', 'Racks + dumbbells'],
+  ['Conditioning', 'Rowers + bikes'],
+  ['Recovery', 'Cold + compression'],
+  ['Trial Pass', 'Final CTA'],
+];
 
 function progressFrom(el) {
   if (!el) return 0;
@@ -394,9 +403,21 @@ function PulseForge({ site, expanded, scrollProgress }) {
     ['Hypertrophy', 'Dumbbell wall, tempo sets, form videos after class.'],
     ['Recovery', 'Mobility table, cold plunge protocol, coach check-out.'],
   ];
-  return <div className="site-canvas pulse-site text-white"><ThreeScene variant="fly" active={expanded} scrollProgress={scrollProgress} /><nav className="pulse-nav"><b>PF/06</b><span>Entrance</span><span>Turf</span><span>Strength</span><span>Recovery</span><button>Trial pass</button></nav><section className="pulse-hero"><BrandImage site={site} className="pulse-photo" /><div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>Preview tonight's classes</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section><section className="pulse-map"><h4>Entrance → turf lane → strength zone → conditioning → recovery.</h4><div>{['Entrance desk', 'green turf + sled track', 'rack line + dumbbell wall', 'rowers + assault bikes', 'recovery room'].map((x, i) => <span key={x}><b>{String(i+1).padStart(2,'0')}</b>{x}</span>)}</div></section><section className="pulse-zones"><h4>Follow the floor plan.</h4>{['Engine Room', 'Iron Floor', 'Recovery Lab', 'Sprint Turf'].map((z, i) => <article key={z}><span>0{i+1}</span><h5>{z}</h5><p>{['Intervals, sled pushes, ropes, assault bikes, and heart-rate based coaching.', 'Olympic racks, dumbbell bays, spotter-led strength blocks, and form checks.', 'Cold plunge, compression, breath tables, and post-session mobility.', 'Speed work, jumps, carries, and small-group conditioning.'][i]}</p></article>)}</section><section className="pulse-rhythm"><div><h4>Tonight's class rhythm.</h4><p>Every block has a coach station, equipment zone, and recovery handoff. Trial members get placed into the safest lane instead of guessing.</p></div><div>{classes.map(([time, name, note]) => <article key={time}><strong>{time}</strong><h5>{name}</h5><p>{note}</p></article>)}</div></section><section className="pulse-programs"><h4>Training method.</h4>{programs.map(([name, copy]) => <article key={name}><h5>{name}</h5><p>{copy}</p></article>)}</section><section className="pulse-coaches"><div><h4>Coaches who correct you before the rep gets ugly.</h4><p>Book a trial and train with a floor lead, not a sales rep. Every session starts with movement screening and ends with a recovery recommendation.</p></div>{['Mara — Strength mechanics', 'Dev — Conditioning engine', 'Anika — Mobility + return-to-training'].map((c) => <span key={c}>{c}</span>)}</section><section className="pulse-pricing"><h4>Choose the rhythm.</h4>{['Trial week / $0', 'Unlimited / $189 mo', 'Semi-private / $340 mo'].map((p) => <article key={p}><h5>{p}</h5><p>Includes coaching notes, class booking, and recovery access.</p></article>)}</section></div>;
+  const walkProgress = Math.min(1, scrollProgress * 1.6);
+  const beatIndex = Math.min(pulseWalkthroughBeats.length - 1, Math.floor(Math.max(0, Math.min(.999, walkProgress)) * pulseWalkthroughBeats.length));
+  const activeBeat = pulseWalkthroughBeats[beatIndex];
+  return <div className={`site-canvas pulse-site ${expanded ? 'pulse-site-walkthrough' : ''} text-white`}>
+    {expanded && <section className="pulse-walk-stage" aria-label="Scroll-controlled PulseForge 3D gym walkthrough"><Suspense fallback={<div className="pulse-walkthrough pulse-walkthrough-loading">Loading 3D gym walkthrough</div>}><PulseForgeWalkthrough active={expanded} scrollProgress={walkProgress} /></Suspense><aside className="pulse-walk-ui" aria-label="PulseForge walkthrough progress"><p>Scroll-synced facility walkthrough</p><strong>{activeBeat[0]}</strong><span>{activeBeat[1]}</span><div>{pulseWalkthroughBeats.map(([label], i) => <i key={label} className={i <= beatIndex ? 'active' : ''}>{label}</i>)}</div></aside><div className="pulse-walk-title"><p>South Austin performance club</p><h3>Walk the gym before the trial pass.</h3><span>One continuous Three.js facility: reception, turf, racks, conditioning, recovery.</span></div></section>}
+    <nav className="pulse-nav"><b>PF/06</b><span>Entrance</span><span>Turf</span><span>Strength</span><span>Conditioning</span><span>Recovery</span><button>Trial pass</button></nav>
+    <section className="pulse-hero pulse-walk-hero">{expanded ? <div className="pulse-scene-spacer" /> : <BrandImage site={site} className="pulse-photo" />}<div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>Scrub the walkthrough</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section>
+    <section className="pulse-map"><h4>One continuous 3D facility: entrance → turf lane → strength → conditioning → recovery.</h4><div>{['Reception desk + branded wall', 'rubber floor + green turf sled track', 'squat racks + dumbbell wall + benches', 'rowers + assault bikes + ropes', 'glass recovery room + cold plunge'].map((x, i) => <span key={x}><b>{String(i+1).padStart(2,'0')}</b>{x}</span>)}</div></section>
+    <section className="pulse-zones"><h4>What the walkthrough passes.</h4>{['Entrance', 'Turf Lane', 'Strength Zone', 'Conditioning Zone'].map((z, i) => <article key={z}><span>0{i+1}</span><h5>{z}</h5><p>{['Check-in desk, concrete wall, branded signage, and first view down the training floor.', 'Green turf, sled rails, hash marks, rubber flooring, and overhead strip lights.', 'Squat racks, benches, dumbbell wall, plates, mirrors, and steel frames.', 'Rower row, assault bikes, battle ropes, kettlebells, coach lane, and recovery handoff.'][i]}</p></article>)}</section>
+    <section className="pulse-rhythm"><div><h4>Tonight's class rhythm.</h4><p>Every block has a coach station, equipment zone, and recovery handoff. Trial members get placed into the safest lane instead of guessing.</p></div><div>{classes.map(([time, name, note]) => <article key={time}><strong>{time}</strong><h5>{name}</h5><p>{note}</p></article>)}</div></section>
+    <section className="pulse-programs"><h4>Training method.</h4>{programs.map(([name, copy]) => <article key={name}><h5>{name}</h5><p>{copy}</p></article>)}</section>
+    <section className="pulse-coaches"><div><h4>Coaches who correct you before the rep gets ugly.</h4><p>Book a trial and train with a floor lead, not a sales rep. Every session starts with movement screening and ends with a recovery recommendation.</p></div>{['Mara — Strength mechanics', 'Dev — Conditioning engine', 'Anika — Mobility + return-to-training'].map((c) => <span key={c}>{c}</span>)}</section>
+    <section className="pulse-pricing"><h4>Settle into the final trial-pass view.</h4>{['Trial week / $0', 'Unlimited / $189 mo', 'Semi-private / $340 mo'].map((p) => <article key={p}><h5>{p}</h5><p>Includes coaching notes, class booking, and recovery access.</p></article>)}</section>
+  </div>;
 }
-
 function AtlasEstate({ site, scrollProgress }) {
   const listings = [
     ['Glass House No. 8', '$6.2M · 4 bed', 'Ocean path, library wall, morning light', '/brand-images/atlas-interior.webp'],

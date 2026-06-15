@@ -212,6 +212,27 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .pulse-site { background: #050507; font-family: 'Arial Narrow', 'Roboto Condensed', Impact, system-ui, sans-serif; }
 .pulse-site .three-shell { opacity: .86; mix-blend-mode: screen; }
+.pulse-site-walkthrough { position: relative; }
+.pulse-walk-stage { position: relative; height: 560vh; min-height: 260rem; background: #050507; }
+.pulse-walkthrough { position: sticky; top: 0; z-index: 0; height: 100dvh; min-height: 42rem; overflow: hidden; background: radial-gradient(circle at 55% 30%, rgba(255,45,85,.12), transparent 34rem), #050507; }
+.pulse-walkthrough-canvas { position: absolute; inset: 0; }
+.pulse-walkthrough canvas { display: block; width: 100% !important; height: 100% !important; }
+.pulse-walkthrough::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.55), transparent 36%, transparent 72%, rgba(0,0,0,.44)), linear-gradient(0deg, rgba(0,0,0,.42), transparent 34%, rgba(0,0,0,.18)); }
+.pulse-walkthrough-fallback, .pulse-walkthrough-loading { position: sticky; top: 0; z-index: 1; min-height: 100dvh; display: grid; place-items: center; color: rgba(255,255,255,.76); text-transform: uppercase; letter-spacing: .14em; background: linear-gradient(135deg,#07070a,#151014); }
+.pulse-walk-ui { position: sticky; top: 5rem; z-index: 8; float: right; width: min(22rem, calc(100% - 2rem)); margin: -96vh 2rem 0 0; border: 1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.58); border-radius: 1rem; padding: 1rem; backdrop-filter: blur(18px); box-shadow: 0 30px 90px rgba(0,0,0,.35); }
+.pulse-walk-ui p { margin: 0 0 .45rem; color: rgba(255,255,255,.54); text-transform: uppercase; letter-spacing: .16em; font-weight: 900; }
+.pulse-walk-ui strong { display: block; font-size: 2.2rem; line-height: .9; text-transform: uppercase; }
+.pulse-walk-ui > span { display: block; margin-top: .5rem; color: rgba(255,255,255,.68); }
+.pulse-walk-ui div { margin-top: 1rem; display: grid; gap: .35rem; }
+.pulse-walk-ui i { font-style: normal; border-left: 2px solid rgba(255,255,255,.16); padding: .35rem .65rem; color: rgba(255,255,255,.42); text-transform: uppercase; letter-spacing: .1em; }
+.pulse-walk-ui i.active { border-left-color: #ff2d55; color: #fff; background: rgba(255,45,85,.12); }
+.pulse-walk-title { position: absolute; top: calc(100dvh - 15rem); left: 3rem; z-index: 7; width: min(45rem, calc(100% - 3rem)); pointer-events: none; }
+.pulse-walk-title p { color: rgba(255,255,255,.58); text-transform: uppercase; letter-spacing: .18em; font-weight: 900; }
+.pulse-walk-title h3 { max-width: 42rem; font-size: clamp(3.2rem, 8vw, 8.5rem); line-height: .78; letter-spacing: -.09em; text-transform: uppercase; }
+.pulse-walk-title span { display: block; max-width: 34rem; margin-top: 1rem; color: rgba(255,255,255,.72); line-height: 1.55; }
+.pulse-site-walkthrough .pulse-nav { margin-top: -1px; background: #050507; border-top: 1px solid rgba(255,255,255,.12); }
+.pulse-site-walkthrough .pulse-walk-hero { min-height: 34rem; padding-top: 5rem; background: #050507; }
+.pulse-scene-spacer { display: none; }
 .pulse-nav { position: relative; z-index: 5; display: flex; align-items: center; gap: 1.1rem; padding: 1.2rem 2rem; text-transform: uppercase; letter-spacing: .18em; font-size: .72rem; }
 .pulse-nav b { margin-right: auto; color: #fff; }
 .pulse-nav span { color: rgba(255,255,255,.48); }
@@ -447,6 +468,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
   .expanded-site .site-canvas section { padding-left: 1rem; padding-right: 1rem; }
   .eyebrow { letter-spacing: 0.16em; }
+  .pulse-walk-stage { height: 480vh; min-height: 220rem; }
+  .pulse-walk-ui { float: none; top: 4.5rem; width: calc(100% - 1.4rem); margin: -95vh .7rem 0; }
+  .pulse-walk-title { left: 1rem; top: calc(100dvh - 12rem); width: calc(100% - 2rem); }
+  .pulse-walk-title h3 { font-size: clamp(3rem, 16vw, 5.8rem); }
+  .pulse-nav { overflow-x: auto; padding-inline: 1rem; }
+  .pulse-nav span { white-space: nowrap; }
   .pulse-hero,
   .pulse-map,
   .pulse-rhythm,
