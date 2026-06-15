@@ -101,39 +101,92 @@ function ThreeScene({ variant = 'fly', active = false, scrollProgress = 0 }) {
     };
 
     if (variant === 'fly') {
-      scene.fog = new THREE.FogExp2('#050306', 0.028);
-      const wallMat = new THREE.MeshBasicMaterial({ color: '#11151b', transparent: true, opacity: 0.9 });
-      const glassMat = new THREE.MeshBasicMaterial({ color: '#27323b', transparent: true, opacity: 0.44, wireframe: true });
-      const redMat = new THREE.MeshBasicMaterial({ color: '#ff2d55', transparent: true, opacity: 0.82 });
-      const whiteMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 });
-      const darkMat = new THREE.MeshBasicMaterial({ color: '#050608', transparent: true, opacity: 0.95 });
-      const floorGeo = new THREE.BoxGeometry(7.8, 0.04, 2.05);
-      const wallGeo = new THREE.BoxGeometry(0.05, 2.55, 2.05);
-      const beamGeo = new THREE.BoxGeometry(7.8, 0.04, 0.08);
-      const laneGeo = new THREE.BoxGeometry(0.025, 0.035, 2.0);
-      const lightGeo = new THREE.BoxGeometry(1.1, 0.03, 0.18);
-      const signGeo = new THREE.PlaneGeometry(1.2, 0.34);
-      const rackGeo = new THREE.BoxGeometry(0.38, 1.35, 0.08);
-      const plateGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.05, 18);
+      scene.fog = new THREE.FogExp2('#050306', 0.034);
       const addMesh = (mesh, kind, phase = 0) => { scene.add(mesh); objects.push({ mesh, kind, phase }); return mesh; };
-      for (let i = 0; i < 38; i += 1) {
-        const z = -i * 2.05;
-        const floor = addMesh(new THREE.Mesh(floorGeo, wallMat.clone()), 'floor', i); floor.position.set(0, -1.72, z);
-        const leftWall = addMesh(new THREE.Mesh(wallGeo, i % 4 === 0 ? glassMat.clone() : wallMat.clone()), 'wall', i); leftWall.position.set(-3.9, -0.35, z);
-        const rightWall = addMesh(new THREE.Mesh(wallGeo, i % 5 === 0 ? glassMat.clone() : wallMat.clone()), 'wall', i); rightWall.position.set(3.9, -0.35, z);
-        const beam = addMesh(new THREE.Mesh(beamGeo, i % 3 === 0 ? redMat.clone() : whiteMat.clone()), 'beam', i); beam.position.set(0, 1.25, z - 0.85); beam.material.opacity = i % 3 === 0 ? 0.45 : 0.18;
-        [-1.15, 0, 1.15].forEach((x) => { const lane = addMesh(new THREE.Mesh(laneGeo, x === 0 ? redMat.clone() : whiteMat.clone()), 'lane', i); lane.position.set(x, -1.66, z); lane.material.opacity = x === 0 ? 0.62 : 0.24; });
-        if (i % 4 === 1) { const light = addMesh(new THREE.Mesh(lightGeo, redMat.clone()), 'light', i); light.position.set(-2.15, 1.18, z); const light2 = addMesh(new THREE.Mesh(lightGeo, whiteMat.clone()), 'light', i); light2.position.set(2.15, 1.18, z); }
-        if (i % 6 === 2) { const sign = addMesh(new THREE.Mesh(signGeo, redMat.clone()), 'sign', i); sign.position.set(-3.86, 0.75, z); sign.rotation.y = Math.PI / 2; }
-        if (i % 7 === 3) { [-3.25, 3.25].forEach((x, side) => { const rack = addMesh(new THREE.Mesh(rackGeo, darkMat.clone()), 'equipment', i); rack.position.set(x, -0.95, z - 0.35); const bar = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.05, 0.05), whiteMat.clone()), 'equipment', i); bar.position.set(x + (side ? -0.2 : 0.2), -0.55, z - 0.35); [-0.34, 0.34].forEach((dy) => { const plate = addMesh(new THREE.Mesh(plateGeo, redMat.clone()), 'equipment', i); plate.position.set(x, -0.55 + dy, z - 0.32); plate.rotation.z = Math.PI / 2; }); }); }
-        if (i % 9 === 0) { const doorway = addMesh(new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.9, 0.05), glassMat.clone()), 'doorway', i); doorway.position.set(i % 18 === 0 ? -3.88 : 3.88, -0.45, z - 0.7); doorway.rotation.y = Math.PI / 2; }
+      const mat = (color, opacity = 1, wireframe = false) => new THREE.MeshBasicMaterial({ color, transparent: opacity < 1, opacity, wireframe });
+      const rubberMat = mat('#15171b', 0.96);
+      const turfMat = mat('#123f2c', 0.92);
+      const steelMat = mat('#9aa1aa', 0.5);
+      const mirrorMat = mat('#dce9ef', 0.24, true);
+      const redMat = mat('#ff2d55', 0.82);
+      const whiteMat = mat('#ffffff', 0.45);
+      const darkMat = mat('#050608', 0.95);
+      const greenMat = mat('#49d17a', 0.7);
+      const zoneData = [
+        { name: 'ENTRANCE', z: 6, color: '#ffffff' },
+        { name: 'TURF LANE', z: -8, color: '#49d17a' },
+        { name: 'STRENGTH', z: -23, color: '#ff2d55' },
+        { name: 'CONDITIONING', z: -41, color: '#ffbd38' },
+        { name: 'RECOVERY', z: -61, color: '#72c7ad' },
+      ];
+      const makeLabel = (text, color = '#ff2d55') => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, 512, 128);
+        ctx.fillStyle = 'rgba(0,0,0,.58)'; ctx.fillRect(0, 0, 512, 128);
+        ctx.strokeStyle = color; ctx.lineWidth = 6; ctx.strokeRect(6, 6, 500, 116);
+        ctx.fillStyle = '#ffffff'; ctx.font = '700 42px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(text, 256, 66);
+        const texture = new THREE.CanvasTexture(canvas); texture.needsUpdate = true;
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.45, 0.62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0.9 }));
+        mesh.userData.map = texture;
+        return mesh;
+      };
+
+      for (let i = 0; i < 42; i += 1) {
+        const z = 7 - i * 1.78;
+        const floor = addMesh(new THREE.Mesh(new THREE.BoxGeometry(7.9, 0.05, 1.72), rubberMat.clone()), 'floor', i); floor.position.set(0, -1.72, z);
+        const seam = addMesh(new THREE.Mesh(new THREE.BoxGeometry(7.7, 0.018, 0.018), whiteMat.clone()), 'rubber-seam', i); seam.position.set(0, -1.675, z - .78); seam.material.opacity = .1;
+        const turf = addMesh(new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.065, 1.68), turfMat.clone()), 'turf', i); turf.position.set(-1.45, -1.66, z);
+        const sledRailA = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.08, 1.6), greenMat.clone()), 'sled', i); sledRailA.position.set(-1.92, -1.59, z);
+        const sledRailB = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.08, 1.6), greenMat.clone()), 'sled', i); sledRailB.position.set(-0.98, -1.59, z);
+        const leftWall = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.65, 1.72), i % 5 === 0 ? mirrorMat.clone() : darkMat.clone()), 'wall', i); leftWall.position.set(-3.95, -0.35, z);
+        const rightWall = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.65, 1.72), i % 6 === 0 ? mirrorMat.clone() : darkMat.clone()), 'wall', i); rightWall.position.set(3.95, -0.35, z);
+        const frameTop = addMesh(new THREE.Mesh(new THREE.BoxGeometry(7.9, 0.05, 0.05), steelMat.clone()), 'frame', i); frameTop.position.set(0, 1.02, z - .78);
+        const strip = addMesh(new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.035, 0.16), i % 3 === 0 ? redMat.clone() : whiteMat.clone()), 'light', i); strip.position.set(i % 2 ? -1.7 : 1.7, 1.22, z - .35);
+
+        if (i > 10 && i < 24 && i % 3 === 0) {
+          [-3.2, 2.85].forEach((x, side) => {
+            const rackL = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.45, 0.08), steelMat.clone()), 'equipment', i); rackL.position.set(x, -0.92, z);
+            const rackR = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.45, 0.08), steelMat.clone()), 'equipment', i); rackR.position.set(x + (side ? -0.62 : 0.62), -0.92, z);
+            const bar = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.05, 0.05), whiteMat.clone()), 'equipment', i); bar.position.set(x + (side ? -0.31 : 0.31), -0.48, z);
+            [-.36, .36].forEach((dx) => { const plate = addMesh(new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.06, 18), redMat.clone()), 'equipment', i); plate.position.set(x + dx, -0.48, z); plate.rotation.z = Math.PI / 2; });
+          });
+        }
+        if (i > 17 && i < 30 && i % 4 === 0) {
+          for (let d = 0; d < 5; d += 1) {
+            const dumbbell = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.06, 0.08), whiteMat.clone()), 'dumbbell', i + d); dumbbell.position.set(3.73, -1.25 + d * .18, z - .45);
+            const bell = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.12), redMat.clone()), 'dumbbell', i + d); bell.position.set(3.74, -1.25 + d * .18, z - .62);
+          }
+        }
+        if (i > 24 && i < 34 && i % 3 === 1) {
+          const bikeBase = addMesh(new THREE.Mesh(new THREE.BoxGeometry(.72, .06, .18), steelMat.clone()), 'bike', i); bikeBase.position.set(2.45, -1.38, z);
+          const wheelA = addMesh(new THREE.Mesh(new THREE.TorusGeometry(.22, .018, 8, 24), whiteMat.clone()), 'bike', i); wheelA.position.set(2.18, -1.15, z); wheelA.rotation.y = Math.PI / 2;
+          const wheelB = addMesh(new THREE.Mesh(new THREE.TorusGeometry(.18, .015, 8, 24), whiteMat.clone()), 'bike', i); wheelB.position.set(2.72, -1.17, z); wheelB.rotation.y = Math.PI / 2;
+          const rower = addMesh(new THREE.Mesh(new THREE.BoxGeometry(.95, .04, .12), greenMat.clone()), 'rower', i); rower.position.set(-3.0, -1.42, z);
+        }
+        if (i > 28 && i < 38 && i % 5 === 0) {
+          const rope = addMesh(new THREE.Mesh(new THREE.TorusGeometry(.48, .026, 8, 72), redMat.clone()), 'rope', i); rope.position.set(-3.55, -0.42, z); rope.rotation.y = Math.PI / 2;
+        }
+        if (i > 33 && i % 3 === 0) {
+          const bed = addMesh(new THREE.Mesh(new THREE.BoxGeometry(1.4, .16, .52), mat('#72c7ad', .5)), 'recovery', i); bed.position.set(i % 2 ? -2.8 : 2.8, -1.34, z);
+          const sign = makeLabel('RECOVERY', '#72c7ad'); sign.position.set(i % 2 ? -3.87 : 3.87, .42, z - .2); sign.rotation.y = i % 2 ? Math.PI / 2 : -Math.PI / 2; addMesh(sign, 'sign', i);
+        }
+        if (i % 8 === 0) {
+          const doorway = addMesh(new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.05, 0.055), mirrorMat.clone()), 'doorway', i); doorway.position.set(i % 16 === 0 ? -3.9 : 3.9, -0.43, z - 0.68); doorway.rotation.y = Math.PI / 2;
+        }
       }
+      zoneData.forEach((zone, idx) => {
+        const label = makeLabel(zone.name, zone.color); label.position.set(0, 0.75, zone.z); addMesh(label, 'zone-label', idx);
+        const gate = addMesh(new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.04, .08), mat(zone.color, .58)), 'zone-gate', idx); gate.position.set(0, 1.03, zone.z - .6);
+      });
       const particleGeo = new THREE.BufferGeometry();
-      const count = 520;
+      const count = 420;
       const pos = new Float32Array(count * 3);
-      for (let i = 0; i < count; i += 1) { pos[i * 3] = (Math.random() - 0.5) * 6.6; pos[i * 3 + 1] = -1.45 + Math.random() * 2.25; pos[i * 3 + 2] = -Math.random() * 78; }
+      for (let i = 0; i < count; i += 1) { pos[i * 3] = (Math.random() - 0.5) * 6.6; pos[i * 3 + 1] = -1.45 + Math.random() * 2.2; pos[i * 3 + 2] = 9 - Math.random() * 84; }
       particleGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: '#ffffff', size: 0.018, transparent: true, opacity: 0.35 }));
+      const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: '#ffffff', size: 0.018, transparent: true, opacity: 0.28 }));
       scene.add(particles); objects.push({ mesh: particles, kind: 'particles', phase: 0 });
     } else {
       const geometry = new THREE.IcosahedronGeometry(1.6, 96);
@@ -227,7 +280,12 @@ function ThreeScene({ variant = 'fly', active = false, scrollProgress = 0 }) {
       host.removeEventListener('pointermove', onPointer);
       window.removeEventListener('resize', resize);
       renderer.dispose();
-      objects.forEach(({ mesh }) => { mesh.geometry?.dispose?.(); Array.isArray(mesh.material) ? mesh.material.forEach((m) => m.dispose?.()) : mesh.material?.dispose?.(); });
+      objects.forEach(({ mesh }) => {
+        mesh.geometry?.dispose?.();
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((m) => { m?.map?.dispose?.(); m?.dispose?.(); });
+        mesh.userData?.map?.dispose?.();
+      });
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
   }, [variant, active]);
@@ -324,18 +382,32 @@ function SiteRenderer({ site, expanded = false, scrollProgress = 0 }) {
 }
 
 function PulseForge({ site, expanded, scrollProgress }) {
-  return <div className="site-canvas pulse-site text-white"><ThreeScene variant="fly" active={expanded} scrollProgress={scrollProgress} /><nav className="pulse-nav"><b>PF/06</b><span>Zones</span><span>Coaches</span><span>Recovery</span><button>Trial pass</button></nav><section className="pulse-hero"><BrandImage site={site} className="pulse-photo" /><div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>See tonight's classes</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section><section className="pulse-zones"><h4>Follow the floor plan.</h4>{['Engine Room', 'Iron Floor', 'Recovery Lab', 'Sprint Turf'].map((z, i) => <article key={z}><span>0{i+1}</span><h5>{z}</h5><p>{['Intervals, sled pushes, ropes, assault bikes, and heart-rate based coaching.', 'Olympic racks, dumbbell bays, spotter-led strength blocks, and form checks.', 'Cold plunge, compression, breath tables, and post-session mobility.', 'Speed work, jumps, carries, and small-group conditioning.'][i]}</p></article>)}</section><section className="pulse-coaches"><div><h4>Coaches who correct you before the rep gets ugly.</h4><p>Book a trial and train with a floor lead, not a sales rep. Every session starts with movement screening and ends with a recovery recommendation.</p></div>{['Mara — Strength', 'Dev — Conditioning', 'Anika — Mobility'].map((c) => <span key={c}>{c}</span>)}</section><section className="pulse-pricing"><h4>Choose the rhythm.</h4>{['Trial week / $0', 'Unlimited / $189 mo', 'Semi-private / $340 mo'].map((p) => <article key={p}><h5>{p}</h5><p>Includes coaching notes, class booking, and recovery access.</p></article>)}</section></div>;
+  const classes = [
+    ['5:40', 'Open Gym', 'Strength primer + mobility'],
+    ['6:15', 'Forge 45', 'Sleds, ropes, rowers, assault bikes'],
+    ['7:10', 'Hypertrophy', 'Rack work + dumbbell density'],
+    ['8:00', 'Recovery', 'Compression, breath, cold rinse'],
+  ];
+  const programs = [
+    ['Strength', 'Rack-led blocks, bar speed notes, spotter rotation.'],
+    ['Conditioning', 'Heart-rate caps, sled track waves, rower intervals.'],
+    ['Hypertrophy', 'Dumbbell wall, tempo sets, form videos after class.'],
+    ['Recovery', 'Mobility table, cold plunge protocol, coach check-out.'],
+  ];
+  return <div className="site-canvas pulse-site text-white"><ThreeScene variant="fly" active={expanded} scrollProgress={scrollProgress} /><nav className="pulse-nav"><b>PF/06</b><span>Entrance</span><span>Turf</span><span>Strength</span><span>Recovery</span><button>Trial pass</button></nav><section className="pulse-hero"><BrandImage site={site} className="pulse-photo" /><div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>Preview tonight's classes</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section><section className="pulse-map"><h4>Entrance → turf lane → strength zone → conditioning → recovery.</h4><div>{['Entrance desk', 'green turf + sled track', 'rack line + dumbbell wall', 'rowers + assault bikes', 'recovery room'].map((x, i) => <span key={x}><b>{String(i+1).padStart(2,'0')}</b>{x}</span>)}</div></section><section className="pulse-zones"><h4>Follow the floor plan.</h4>{['Engine Room', 'Iron Floor', 'Recovery Lab', 'Sprint Turf'].map((z, i) => <article key={z}><span>0{i+1}</span><h5>{z}</h5><p>{['Intervals, sled pushes, ropes, assault bikes, and heart-rate based coaching.', 'Olympic racks, dumbbell bays, spotter-led strength blocks, and form checks.', 'Cold plunge, compression, breath tables, and post-session mobility.', 'Speed work, jumps, carries, and small-group conditioning.'][i]}</p></article>)}</section><section className="pulse-rhythm"><div><h4>Tonight's class rhythm.</h4><p>Every block has a coach station, equipment zone, and recovery handoff. Trial members get placed into the safest lane instead of guessing.</p></div><div>{classes.map(([time, name, note]) => <article key={time}><strong>{time}</strong><h5>{name}</h5><p>{note}</p></article>)}</div></section><section className="pulse-programs"><h4>Training method.</h4>{programs.map(([name, copy]) => <article key={name}><h5>{name}</h5><p>{copy}</p></article>)}</section><section className="pulse-coaches"><div><h4>Coaches who correct you before the rep gets ugly.</h4><p>Book a trial and train with a floor lead, not a sales rep. Every session starts with movement screening and ends with a recovery recommendation.</p></div>{['Mara — Strength mechanics', 'Dev — Conditioning engine', 'Anika — Mobility + return-to-training'].map((c) => <span key={c}>{c}</span>)}</section><section className="pulse-pricing"><h4>Choose the rhythm.</h4>{['Trial week / $0', 'Unlimited / $189 mo', 'Semi-private / $340 mo'].map((p) => <article key={p}><h5>{p}</h5><p>Includes coaching notes, class booking, and recovery access.</p></article>)}</section></div>;
 }
 
 function AtlasEstate({ site, scrollProgress }) {
   const listings = [
-    ['Glass House No. 8', '$6.2M · 4 bed · ocean path', '/brand-images/atlas-interior.webp'],
-    ['Cliff Road Villa', '$8.9M · gated bluff', '/brand-images/atlas-cliff-villa.webp'],
-    ['Juniper Courtyard', '$3.7M · courtyard retreat', '/brand-images/atlas-courtyard.webp'],
+    ['Glass House No. 8', '$6.2M · 4 bed', 'Ocean path, library wall, morning light', '/brand-images/atlas-interior.webp'],
+    ['Cliff Road Villa', '$8.9M · gated bluff', 'Bluff view, privacy drive, airport in 22', '/brand-images/atlas-cliff-villa.webp'],
+    ['Juniper Courtyard', '$3.7M · retreat', 'Internal courtyard, guest casita option', '/brand-images/atlas-courtyard.webp'],
+    ['Pool House Reserve', '$5.4M · guest house', 'Pool pavilion, privacy wall, shoreline walk', '/brand-images/atlas-guest-house.webp'],
+    ['Library Bluff House', '$7.1M · office wing', 'Walnut library, office suite, quiet approach', '/brand-images/atlas-library.webp'],
   ];
-  return <div className="site-canvas atlas-site"><nav className="atlas-nav"><span>Atlas Estate</span><span>Private list · Coastal advisory · Buyer concierge</span></nav><section className="atlas-hero"><div className="atlas-title"><p>By-appointment coastal brokerage</p><h3>Homes that rarely reach the open market.</h3><button>Request the private list</button></div><BrandImage site={site} className="atlas-photo" /><aside><strong>$4.8M</strong><span>average private transaction</span><strong>37</strong><span>quiet listings this quarter</span></aside></section><section className="atlas-route"><ScrollDrawSvg viewBox="0 0 900 320" progress={scrollProgress} paths={[{ d: 'M40 260 C 180 80, 320 240, 450 120 S 680 80, 850 210', stroke: '#c7985c', strokeWidth: 5, start: .08, end: .42 }]}><circle cx="450" cy="120" r="8" /><circle cx="710" cy="130" r="8" /></ScrollDrawSvg><div><h4>A guided route through neighborhoods, not a feed of listings.</h4><p>We start with schools, shoreline, privacy, guest-house rules, airport time, and the difference between beautiful photos and a livable week.</p></div></section><section className="atlas-listings">{listings.map(([name, meta, src]) => <article key={name}><Photo src={src} alt={`${name} property photography`} shade={false} /><p>Private residence</p><h5>{name}</h5><span>{meta}</span></article>)}</section><section className="atlas-intake"><h4>Tell us what should never hit Zillow.</h4><div>{['Budget range', 'Timeline', 'School / commute', 'Privacy needs'].map((f) => <span key={f}>{f}</span>)}</div><button>Begin buyer intake</button></section></div>;
+  const process = ['Discovery', 'Route', 'Tour', 'Offer', 'Close'];
+  return <div className="site-canvas atlas-site"><nav className="atlas-nav"><span>Atlas Estate</span><span>Private list · Coastal advisory · Buyer concierge</span></nav><section className="atlas-hero"><div className="atlas-title"><p>By-appointment coastal brokerage</p><h3>Homes that rarely reach the open market.</h3><button>Request the private list</button></div><BrandImage site={site} className="atlas-photo" /><aside><strong>$4.8M</strong><span>average private transaction</span><strong>37</strong><span>quiet listings this quarter</span></aside></section><section className="atlas-route"><ScrollDrawSvg viewBox="0 0 900 320" progress={scrollProgress} paths={[{ d: 'M40 260 C 180 80, 320 240, 450 120 S 680 80, 850 210', stroke: '#c7985c', strokeWidth: 5, start: .08, end: .42 }]}><circle cx="450" cy="120" r="8" /><circle cx="710" cy="130" r="8" /></ScrollDrawSvg><div><h4>A guided route through neighborhoods, not a feed of listings.</h4><p>We start with schools, shoreline, privacy, guest-house rules, airport time, and the difference between beautiful photos and a livable week.</p></div></section><section className="atlas-process"><h4>Buyer advisory path.</h4>{process.map((step, i) => <article key={step}><span>{String(i+1).padStart(2,'0')}</span><h5>{step}</h5><p>{['Budget, lifestyle, schools, privacy, non-negotiables.', 'A private driving route ordered by daily life, not price.', 'One-day tour plan with notes, comps, and seller context.', 'Quiet offer strategy, due diligence, and terms.', 'Closing calendar, vendors, insurance, and move-in brief.'][i]}</p></article>)}</section><section className="atlas-listings atlas-listings-wide">{listings.map(([name, price, angle, src]) => <article key={name}><Photo src={src} alt={`${name} property photography`} shade={false} /><p>Private residence</p><h5>{name}</h5><span>{price}</span><em>{angle}</em></article>)}</section><section className="atlas-intake"><h4>Tell us what should never hit Zillow.</h4><div>{['Budget range', 'Timeline', 'School / commute', 'Guest-house needs', 'Privacy threshold', 'Airport access'].map((f) => <span key={f}>{f}</span>)}</div><button>Begin buyer intake</button></section></div>;
 }
-
 
 function VerdantWorks({ site, scrollProgress }) {
   const transformations = [
@@ -343,24 +415,45 @@ function VerdantWorks({ site, scrollProgress }) {
     ['After: stone steps + meadow', '/brand-images/verdant-after.webp'],
     ['Care: monthly cutback', '/brand-images/verdant-care.webp'],
   ];
-  return <div className="site-canvas verdant-site"><header><div><p>Outdoor rooms for real weather</p><h3>Courtyards, patios, and native gardens that settle in beautifully.</h3><button>Schedule a yard walk</button></div><BrandImage site={site} /></header><section className="verdant-plan"><div><h4>From rough lot to living plan.</h4><p>We map shade, drainage, privacy, circulation, and plant maintenance before anyone starts hauling stone.</p></div><ScrollDrawSvg viewBox="0 0 620 360" progress={scrollProgress} paths={[{ d: 'M62 290 C150 120 260 295 365 105 S530 80 578 230', stroke: '#486b32', strokeWidth: 6, start: .1, end: .46 }, { d: 'M95 175 C190 210 310 110 500 150', stroke: '#9c6d3c', strokeWidth: 3, start: .22, end: .58 }]} /></section><section className="verdant-wipe">{transformations.map(([x, src]) => <article key={x}><Photo src={src} alt={`${x} landscaping photography`} shade={false} /><h5>{x}</h5></article>)}</section><section className="verdant-services"><h4>What homeowners actually need.</h4>{['Outdoor room design', 'Native planting', 'Stone + water', 'Seasonal care plans', 'Lighting', 'Storm cleanup'].map((service) => <span key={service}>{service}</span>)}</section><section className="verdant-estimate"><h4>Get a useful estimate.</h4><p>Send yard size, photos, sun exposure, budget range, and the outdoor room you wish existed.</p><button>Start estimate</button></section></div>;
+  return <div className="site-canvas verdant-site"><header><div><p>Outdoor rooms for real weather</p><h3>Courtyards, patios, and native gardens that settle in beautifully.</h3><button>Schedule a yard walk</button></div><BrandImage site={site} /></header><section className="verdant-plan"><div><h4>Site plan → phases → completion.</h4><p>The animated line follows the actual design sequence: drainage cut, stone path, planting pockets, then final care route.</p></div><ScrollDrawSvg viewBox="0 0 620 360" progress={scrollProgress} paths={[{ d: 'M62 290 C150 120 260 295 365 105 S530 80 578 230', stroke: '#486b32', strokeWidth: 6, start: .1, end: .46 }, { d: 'M95 175 C190 210 310 110 500 150', stroke: '#9c6d3c', strokeWidth: 3, start: .22, end: .58 }]}><circle cx="62" cy="290" r="7" /><circle cx="365" cy="105" r="7" /><circle cx="578" cy="230" r="7" /></ScrollDrawSvg></section><section className="verdant-wipe">{transformations.map(([x, src]) => <article key={x}><Photo src={src} alt={`${x} landscaping photography`} shade={false} /><h5>{x}</h5></article>)}</section><section className="verdant-packages"><h4>Service tiers that match the yard.</h4>{[['Foundation plan', '$1.8k design', 'Shade map, drainage notes, material board.'], ['Courtyard build', '$18k–$55k', 'Stone, beds, irrigation, lighting, install crew.'], ['Seasonal steward', '$240/mo', 'Cutback, soil, pruning, storm reset, plant health.']].map(([name, price, copy]) => <article key={name}><span>{price}</span><h5>{name}</h5><p>{copy}</p></article>)}</section><section className="verdant-services"><h4>What homeowners actually need.</h4>{['Outdoor room design', 'Native planting', 'Stone + water', 'Seasonal care plans', 'Lighting', 'Storm cleanup'].map((service) => <span key={service}>{service}</span>)}</section><section className="verdant-timeline"><h4>Seasonal care timeline.</h4>{['Spring soil + pruning', 'Summer irrigation watch', 'Fall cutback + bulbs', 'Winter storm reset'].map((x) => <span key={x}>{x}</span>)}</section><section className="verdant-estimate"><h4>Get a useful estimate.</h4><p>Send yard size, photos, sun exposure, slope/drainage notes, budget range, and the outdoor room you wish existed.</p><button>Start estimate</button></section></div>;
 }
 
-
 function OrbitSupply({ site, expanded, scrollProgress }) {
-  return <div className="site-canvas orbit-site text-white"><nav><span>ORBIT SUPPLY / DROP 04</span><button>Cart — $248</button></nav><section className="orbit-hero"><div><p>Adaptive carry system</p><h3>AeroShell Pack</h3><p>Weather shell, carbon frame, removable grid pouch, and strap hardware built for commuters who pack like field operators.</p><button>Reserve the drop</button></div><div className="orbit-object"><BrandImage site={site} shade={false} /><ThreeScene variant="morph" active={expanded} scrollProgress={scrollProgress} /></div></section><section className="orbit-specs"><h4>Material states change with the day.</h4>{['Iridescent rain shell', 'Carbon load frame', 'Magnetic grid pouch', 'Thermal laptop sleeve'].map((s) => <article key={s}><h5>{s}</h5><p>Scroll the object: seams pull open, shell bands shift, and the silhouette gets more technical.</p></article>)}</section><section className="orbit-variants">{['Graphite', 'Ion blue', 'Field clay', 'Night violet'].map((v, i) => <button key={v} style={{ '--swatch': ['#24262d','#73f5ff','#9b7b5a','#7d5cff'][i] }}>{v}</button>)}</section><section className="orbit-cart"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply packaging and components" shade={false} /><h4>Build the kit.</h4><div>{['AeroShell Pack — $248', 'Grid pouch — $48', 'Rain skin — $36'].map((i) => <span key={i}>{i}</span>)}</div><button>Checkout mockup</button></section></div>;
+  const products = [
+    ['OS-AERO-42', 'AeroShell Pack', '$248', '42L · carbon frame', 'commute / field'],
+    ['OS-GRID-08', 'Grid Pouch', '$48', 'magnetic grid · 180g', 'small tech'],
+    ['OS-RAIN-01', 'Rain Skin', '$36', 'ripstop shell · taped seam', 'storm cover'],
+    ['OS-CLIP-04', 'Rail Clips', '$18', 'anodized set of 4', 'strap mods'],
+    ['OS-SLEEVE-16', 'Thermal Sleeve', '$64', '16in · insulated felt', 'laptop'],
+    ['OS-BOTTLE-24', 'Vac Bottle', '$42', '24oz · matte steel', 'hydration'],
+    ['OS-CUBE-12', 'Pack Cube', '$32', '12L · mesh wall', 'clothes'],
+    ['OS-LIGHT-02', 'Signal Light', '$58', 'USB-C · amber/red', 'night ride'],
+  ];
+  return <div className="site-canvas orbit-site text-white"><nav><span>ORBIT SUPPLY / DROP 04</span><button>Cart — 3 items · $332</button></nav><section className="orbit-hero"><div><p>Adaptive carry system</p><h3>AeroShell Pack</h3><p>Weather shell, carbon frame, removable grid pouch, and strap hardware built for commuters who pack like field operators.</p><button>Reserve the drop</button></div><div className="orbit-object"><BrandImage site={site} shade={false} /><ThreeScene variant="morph" active={expanded} scrollProgress={scrollProgress} /></div></section><section className="orbit-detail"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply kit packaging and components" shade={false} /><div><span>Hero item / OS-AERO-42</span><h4>AeroShell Pack detail.</h4><p>Carbon U-frame, roll-top rain shell, magnetic front grid, 16-inch thermal sleeve, removable compression straps, and repairable buckle hardware.</p><div>{['Graphite', 'Ion blue', 'Field clay', 'Night violet'].map((v, i) => <button key={v} style={{ '--swatch': ['#24262d','#73f5ff','#9b7b5a','#7d5cff'][i] }}>{v}</button>)}</div></div></section><section className="orbit-specs"><h4>Material states change with the day.</h4>{['Rain shell beads water', 'Carbon frame keeps load shape', 'Grid pouch snaps off', 'Thermal sleeve protects battery'].map((s) => <article key={s}><h5>{s}</h5><p>Scroll the object: seams pull open, shell bands shift, and the silhouette gets more technical.</p></article>)}</section><section className="orbit-filters"><span>All gear</span><span>Packs</span><span>Modular pouches</span><span>Weather</span><span>Accessories</span></section><section className="orbit-catalog">{products.map(([sku, name, price, spec, use]) => <article key={sku}><small>{sku}</small><h5>{name}</h5><strong>{price}</strong><p>{spec}</p><em>{use}</em></article>)}</section><section className="orbit-cart"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply packaging and components" shade={false} /><h4>Complete the kit.</h4><div>{['AeroShell Pack — $248', 'Grid pouch — $48', 'Rain skin — $36'].map((i) => <span key={i}>{i}</span>)}<strong>Total — $332</strong></div><button>Checkout mockup</button></section></div>;
 }
 
 function TheMargin({ site }) {
-  return <div className="site-canvas margin-site"><section className="margin-mast"><p>Issue 09 / Work, attention, small teams</p><h3>The Margin</h3><BrandImage site={site} className="margin-cover" /></section><section className="margin-lede"><article><span>Cover essay</span><h4>The craft hiding in boring tools.</h4><p>Why useful software often looks quiet before it becomes indispensable.</p></article><article><span>Interview</span><h4>Small teams, big taste.</h4><p>A conversation on constraint, distribution, and refusing generic polish.</p></article></section><section className="margin-rail"><h4>Read the issue</h4>{['Field notes', 'Essays', 'Interviews', 'Archive', 'Letters'].map((c) => <span key={c}>{c}</span>)}</section><section className="margin-layout"><div><h4>A slower place to read about building.</h4><p>Monthly issue, editor notes, research links, and a small archive that rewards returning instead of refreshing.</p><button>Subscribe for the next issue</button></div><Photo src="/brand-images/margin-spread.webp" alt="The Margin open issue spread" shade={false} /></section></div>;
+  const articles = [
+    ['Essay', 'The craft hiding in boring tools.', '11 min'],
+    ['Interview', 'Small teams, big taste.', '18 min'],
+    ['Field notes', 'What the spreadsheet remembered.', '7 min'],
+    ['Letters', 'Against launch-day theater.', '5 min'],
+  ];
+  return <div className="site-canvas margin-site"><section className="margin-mast"><p>Issue 09 / Work, attention, small teams</p><h3>The Margin</h3><BrandImage site={site} className="margin-cover" /></section><section className="margin-lede"><article><span>Cover essay · 11 min</span><h4>The craft hiding in boring tools.</h4><p>Why useful software often looks quiet before it becomes indispensable.</p></article><article><span>Editor letter</span><h4>Build less theater.</h4><p>Notes on useful interfaces, patient distribution, and the kind of polish that survives a Monday morning.</p></article></section><section className="margin-archive"><aside><h4>Current issue</h4><p>No. 09 · Work, attention, small teams</p>{['No. 08 Taste under constraint', 'No. 07 The useful internet', 'No. 06 Quiet software'].map((i) => <span key={i}>{i}</span>)}</aside><div>{articles.map(([cat, title, time]) => <article key={title}><span>{cat}</span><h5>{title}</h5><small>{time}</small></article>)}</div></section><section className="margin-rail"><h4>Read the issue</h4>{['Field notes', 'Essays', 'Interviews', 'Archive', 'Letters'].map((c) => <span key={c}>{c}</span>)}</section><section className="margin-layout"><div><h4>A slower place to read about building.</h4><p>Monthly issue, editor notes, research links, printable margins, and a small archive that rewards returning instead of refreshing.</p><button>Subscribe for the next issue</button></div><Photo src="/brand-images/margin-spread.webp" alt="The Margin open issue spread" shade={false} /></section><section className="margin-editor"><h4>Edited by people who still annotate PDFs.</h4><p>Subscribers get the issue, source notes, and one compact editor memo — no daily drip, no engagement bait.</p></section></div>;
 }
 
 function EmberTable({ site }) {
-  return <div className="site-canvas ember-site text-white"><section className="ember-hero"><BrandImage site={site} /><nav><span>Ember Table</span><button>Reserve</button></nav><div><p>Wood fire dining · East side</p><h3>Smoke, citrus, and a table close to the hearth.</h3><button>Reserve tonight</button></div></section><section className="ember-courses"><h4>Tonight's tasting sequence</h4>{['Hearth bread + cultured butter', 'Charred citrus salad', 'Coal-roasted chicken', 'Saffron panna cotta'].map((c, i) => <article key={c}><span>{i+1}</span><h5>{c}</h5><p>{['Warm pull-apart loaf, black salt.', 'Bitter greens, ember oil, orange.', 'Fermented chili, winter herbs.', 'Olive oil, sea salt, smoke.'][i]}</p></article>)}</section><section className="ember-room"><Photo src="/brand-images/ember-room.webp" alt="Ember Table dining room and hearth" shade={false} /><div><h4>The room glows differently after 7pm.</h4><p>Counter seats face the fire. Booths are quieter. Private dining takes over the back room for twelve.</p></div></section><section className="ember-reserve"><h4>Book dinner or private fire-room events.</h4><div>{['Party size', 'Date', 'Occasion', 'Dietary notes'].map((f) => <span key={f}>{f}</span>)}</div><button>Find a table</button></section></div>;
+  return <div className="site-canvas ember-site text-white"><section className="ember-hero"><BrandImage site={site} /><nav><span>Ember Table</span><button>Reserve</button></nav><div><p>Wood fire dining · East side</p><h3>Smoke, citrus, and a table close to the hearth.</h3><button>Reserve tonight</button></div></section><section className="ember-courses"><h4>Tonight's tasting sequence</h4>{['Hearth bread + cultured butter', 'Charred citrus salad', 'Coal-roasted chicken', 'Saffron panna cotta'].map((c, i) => <article key={c}><span>{i+1}</span><h5>{c}</h5><p>{['Warm pull-apart loaf, black salt.', 'Bitter greens, ember oil, orange.', 'Fermented chili, winter herbs.', 'Olive oil, sea salt, smoke.'][i]}</p></article>)}</section><section className="ember-menu"><h4>À la carte and supplements.</h4>{[['Oysters near the coals', '$22', 'shallot smoke mignonette'], ['Charred prawns', '$28', 'calabrian butter'], ['Ribeye for two', '$86', 'bone marrow jus'], ['Wine pairing', '$58', 'four half-pours']].map(([name, price, note]) => <article key={name}><h5>{name}</h5><span>{price}</span><p>{note}</p></article>)}</section><section className="ember-room"><Photo src="/brand-images/ember-room.webp" alt="Ember Table dining room and hearth" shade={false} /><div><h4>The room glows differently after 7pm.</h4><p>Counter seats face the fire. Booths are quieter. Private dining takes over the back room for twelve, with a chef note and paired ember courses.</p></div></section><section className="ember-reserve"><h4>Book dinner or private fire-room events.</h4><div>{['Party size', 'Preferred time', 'Counter / booth / room', 'Occasion', 'Dietary notes'].map((f) => <span key={f}>{f}</span>)}</div><button>Find a table</button></section></div>;
 }
 
 function LumaSpa({ site }) {
-  return <div className="site-canvas luma-site"><section className="luma-hero"><div><p>Skin · sauna · nervous system</p><h3>Leave quieter than you arrived.</h3><p>Guided treatments, warm rooms, practitioner-led rituals, and booking that feels as calm as the visit.</p><button>Find your treatment</button></div><BrandImage site={site} shade={false} /></section><section className="luma-breathe"><div className="breath-orb" /><h4>Start with how you want to feel.</h4><div>{['Reset tension', 'Calm skin', 'Recover deeply', 'Gift a ritual'].map((x) => <span key={x}>{x}</span>)}</div></section><section className="luma-treatments">{[['The Quiet Facial', '/brand-images/luma-facial.webp'], ['Sauna + cold rinse', '/brand-images/luma-sauna.webp'], ['Stone table recovery', '/brand-images/luma-stone.webp'], ['Monthly glow membership', '/brand-images/luma-membership.webp']].map(([t, src]) => <article key={t}><Photo src={src} alt={`${t} ritual photography`} shade={false} /><h5>{t}</h5><p>Soft light, practitioner notes, duration, and what to expect.</p></article>)}</section><section className="luma-book"><h4>Book without rushing.</h4><p>Choose pressure, focus, room preference, and practitioner. Gift cards and memberships live beside the same calm booking path.</p><button>Open booking mockup</button></section></div>;
+  const treatments = [
+    ['The Quiet Facial', '70 min', '/brand-images/luma-facial.webp', 'Barrier repair, lymphatic massage, warm compress.'],
+    ['Sauna + cold rinse', '45 min', '/brand-images/luma-sauna.webp', 'Private sauna, rinse circuit, mineral towel service.'],
+    ['Stone table recovery', '80 min', '/brand-images/luma-stone.webp', 'Heated stones, shoulder release, breath pacing.'],
+    ['Monthly glow membership', '$118/mo', '/brand-images/luma-membership.webp', 'One ritual credit, product shelf discount, priority evenings.'],
+  ];
+  return <div className="site-canvas luma-site"><section className="luma-hero"><div><p>Skin · sauna · nervous system</p><h3>Leave quieter than you arrived.</h3><p>Guided treatments, warm rooms, practitioner-led rituals, and booking that feels as calm as the visit.</p><button>Find your treatment</button></div><BrandImage site={site} shade={false} /></section><section className="luma-breathe"><div className="breath-orb" /><h4>Start with how you want to feel.</h4><div>{['Reset tension', 'Calm skin', 'Recover deeply', 'Gift a ritual'].map((x) => <span key={x}>{x}</span>)}</div></section><section className="luma-finder"><h4>Ritual finder.</h4>{['I need skin calm', 'I need heat + cold', 'I need muscle release', 'I am booking for someone else'].map((x) => <button key={x}>{x}</button>)}</section><section className="luma-treatments">{treatments.map(([t, meta, src, copy]) => <article key={t}><Photo src={src} alt={`${t} ritual photography`} shade={false} /><h5>{t}</h5><span>{meta}</span><p>{copy}</p></article>)}</section><section className="luma-practitioners"><h4>Practitioners with notes, not scripts.</h4>{[['Mara V.', 'skin barrier + facial massage'], ['Elian S.', 'sauna circuit + recovery'], ['Nora K.', 'stone therapy + breathwork']].map(([name, note]) => <article key={name}><h5>{name}</h5><p>{note}</p></article>)}</section><section className="luma-book"><h4>Book without rushing.</h4><p>Choose pressure, focus, room preference, practitioner, gift card recipient, and whether you want quiet check-in or conversation.</p><button>Open booking mockup</button></section></div>;
 }
 
 export default PortfolioApp;
