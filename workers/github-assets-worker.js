@@ -46,6 +46,9 @@ export default {
         response = await fetch(`${RAW_BASE}/index.html`, { headers: { 'User-Agent': 'web-design-portfolio-worker' } });
       }
       const headers = new Headers(response.headers);
+      // Raw GitHub adds restrictive security headers (notably CSP: default-src 'none')
+      // that would block the Astro bundle when proxied. The Worker owns the final response.
+      ['content-security-policy', 'x-frame-options', 'cross-origin-resource-policy', 'x-xss-protection'].forEach((name) => headers.delete(name));
       headers.set('content-type', MIME[extname(assetPath)] || MIME['.html']);
       headers.set('cache-control', assetPath === '/index.html' ? 'public, max-age=60' : 'public, max-age=31536000, immutable');
       headers.set('x-web-design-portfolio', 'github-dist-worker');
