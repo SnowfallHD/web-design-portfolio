@@ -1,0 +1,9 @@
+dist
+node_modules
+.astro
+.wrangler
+.dev.vars
+.env
+.env.*
+npm-debug.log*
+.DS_Store
