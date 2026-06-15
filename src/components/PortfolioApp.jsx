@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { ArrowUpRight, Dumbbell, Home, Leaf, ShoppingBag, Newspaper, Utensils, Waves, X, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Dumbbell, Home, Leaf, ShoppingBag, Newspaper, Utensils, Waves, X } from 'lucide-react';
 
 const sites = [
   {
@@ -67,6 +67,65 @@ const sites = [
     Icon: Waves,
   },
 ];
+
+const depthContent = {
+  pulseforge: {
+    eyebrow: 'Membership engine',
+    title: 'From first trial to recurring training blocks.',
+    copy: 'A complete gym homepage needs class discovery, coach trust, social proof, and a pass flow that stays visible after the cinematic hero.',
+    cta: 'Claim trial pass',
+    items: ['Class schedule with intensity tags', 'Coach credibility wall', 'Transformation proof + pricing'],
+    dark: true,
+  },
+  atlas: {
+    eyebrow: 'Brokerage depth',
+    title: 'Listings, market intelligence, and private intake.',
+    copy: 'The real estate example continues past the hero with property cards, neighborhood proof, and a high-touch buyer qualification path.',
+    cta: 'Request private list',
+    items: ['Featured residences', 'Neighborhood route map', 'Buyer profile intake'],
+    dark: false,
+  },
+  verdant: {
+    eyebrow: 'Outdoor services funnel',
+    title: 'Proof-led estimates for homeowners.',
+    copy: 'Landscaping needs trust fast: before/after evidence, service packages, seasonal care, and a clean estimate request path.',
+    cta: 'Plan my yard',
+    items: ['Before / after gallery', 'Seasonal maintenance plans', 'Estimate checklist'],
+    dark: true,
+  },
+  orbit: {
+    eyebrow: 'Commerce drop system',
+    title: 'Product story, variants, cart, and drop urgency.',
+    copy: 'The shop expands into product storytelling, material details, bundles, and checkout UI rather than stopping at a shader object.',
+    cta: 'Build bundle',
+    items: ['Texture morph product story', 'Variant selector rail', 'Sticky cart conversion'],
+    dark: true,
+  },
+  margin: {
+    eyebrow: 'Publication system',
+    title: 'A reading surface with subscription gravity.',
+    copy: 'The blog example includes editorial sections, article cards, author modules, and a paid-subscription style CTA.',
+    cta: 'Read the latest',
+    items: ['Featured issue', 'Essay grid', 'Subscriber letter'],
+    dark: false,
+  },
+  ember: {
+    eyebrow: 'Hospitality flow',
+    title: 'Menu, atmosphere, proof, and reservation.',
+    copy: 'The restaurant site keeps the warmth but adds a menu system, chef note, private events, and a repeated booking path.',
+    cta: 'Reserve table',
+    items: ['Seasonal menu cards', 'Chef story module', 'Events inquiry'],
+    dark: true,
+  },
+  luma: {
+    eyebrow: 'Wellness booking path',
+    title: 'Quiet luxury with service clarity.',
+    copy: 'The spa example continues with treatment categories, therapist trust, membership rituals, and a low-pressure booking flow.',
+    cta: 'Find treatment',
+    items: ['Treatment matcher', 'Practitioner trust cards', 'Membership rituals'],
+    dark: false,
+  },
+};
 
 function ThreeScene({ variant = 'fly', active = false }) {
   const mount = useRef(null);
@@ -225,35 +284,55 @@ function PortfolioApp() {
   const activeSite = useMemo(() => sites.find((site) => site.id === selected), [selected]);
 
   useEffect(() => {
+    const onDocClick = (event) => {
+      const close = event.target.closest?.('[data-close-site]');
+      if (close) {
+        setSelected(null);
+        return;
+      }
+      const opener = event.target.closest?.('[data-site-id]');
+      if (opener?.dataset?.siteId) setSelected(opener.dataset.siteId);
+    };
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
+  }, []);
+
+  useEffect(() => {
     document.body.style.overflow = selected ? 'hidden' : '';
+    document.documentElement.style.overflow = selected ? 'hidden' : '';
     const onKey = (event) => { if (event.key === 'Escape') setSelected(null); };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
   }, [selected]);
 
   return (
-    <main className="noise relative min-h-screen overflow-hidden px-4 py-6 text-white sm:px-6 lg:px-10">
-      <div className="pointer-events-none fixed left-1/2 top-0 z-0 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
-      <header className="relative z-10 mx-auto flex max-w-7xl flex-col gap-8 pb-12 pt-10 lg:flex-row lg:items-end lg:justify-between">
+    <main className="showroom-shell relative min-h-screen overflow-hidden px-4 py-5 text-[#ffe6cb] sm:px-6 lg:px-10">
+      <header className="relative z-10 mx-auto grid max-w-7xl gap-8 border-b border-[#ffe6cb]/10 pb-10 pt-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-end">
         <div className="max-w-4xl animate-slide-up">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100 shadow-2xl backdrop-blur">
-            <Sparkles size={14} /> Interactive web-design showroom
+          <div className="eyebrow mb-6 inline-flex items-center gap-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Design showroom / seven mini-sites
           </div>
-          <h1 className="max-w-5xl text-5xl font-black tracking-[-0.08em] text-white sm:text-7xl lg:text-8xl">
-            One page. Seven believable brands. Click into the site.
+          <h1 className="max-w-5xl text-4xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">
+            Web examples with taste, motion, and a real way in.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/68 sm:text-xl">
-            Half-revealed homepage previews stack down the page. Pick one and the same page opens into a full-screen mini-site with its own aesthetic, motion language, SVG path work, and WebGL moments.
+          <p className="mt-6 max-w-2xl text-base leading-7 text-[#ffe6cb]/68 sm:text-lg">
+            Half-revealed homepage previews stack vertically. Open one and it expands into a scrollable inline mini-site with its own layout, animation language, SVG path work, and selective WebGL.
           </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <span className="trace-chip">Single page</span>
+            <span className="trace-chip">Mobile scroll fixed</span>
+            <span className="trace-chip">Worker-ready</span>
+          </div>
         </div>
-        <div className="glass relative z-10 max-w-sm rounded-[2rem] p-5 text-sm text-white/72">
-          <p className="font-semibold text-white">Stack</p>
-          <p className="mt-2">Astro 6, React islands, Tailwind 4, custom CSS animation, SVG path drawing, and Three.js WebGL scenes.</p>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.18em] text-white/48">
-            <span>Worker-ready</span><span>No Pages</span><span>Single-page</span><span>Esc exits</span>
+        <div className="system-card relative z-10 p-5 text-sm text-[#ffe6cb]/72">
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-[#fff8ec]">Build notes</p>
+          <p className="mt-3 leading-6">Astro 6, React islands, Tailwind 4, custom CSS motion, SVG path drawing, and lightweight Three.js scenes.</p>
+          <div className="mt-5 grid grid-cols-2 gap-2 text-[0.68rem] uppercase tracking-[0.18em] text-[#ffe6cb]/45">
+            <span>Astro</span><span>React</span><span>Tailwind</span><span>Three.js</span>
           </div>
         </div>
       </header>
@@ -265,14 +344,15 @@ function PortfolioApp() {
       </section>
 
       {activeSite && (
-        <div className="fixed inset-0 z-50 bg-black/85 p-2 backdrop-blur-xl sm:p-4" role="dialog" aria-modal="true" aria-label={`${activeSite.title} expanded preview`}>
-          <div className="expanded-site portal-enter relative h-full overflow-hidden rounded-[1.75rem] border border-white/15 bg-black shadow-[0_40px_140px_rgba(0,0,0,.75)]">
-            <button
-              className="focus-visible-ring absolute right-4 top-4 z-50 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/45 px-4 py-3 text-sm font-bold text-white shadow-2xl backdrop-blur-xl transition hover:scale-105 hover:bg-white/14"
-              onClick={() => setSelected(null)}
-            >
-              <X size={17} /> Exit site
-            </button>
+        <div className="site-modal fixed inset-0 z-50 overflow-y-auto bg-black/82 p-2 backdrop-blur-xl sm:p-4" role="dialog" aria-modal="true" aria-label={`${activeSite.title} expanded preview`}>
+          <button
+            data-close-site
+            className="focus-visible-ring fixed right-4 top-4 z-[60] inline-flex items-center gap-2 rounded-lg border border-[#ffe6cb]/15 bg-[#041c1c]/80 px-4 py-3 text-sm font-medium text-[#fff8ec] shadow-2xl backdrop-blur-xl transition hover:border-[#ffbd38]/45 hover:bg-[#092626]"
+            onClick={() => setSelected(null)}
+          >
+            <X size={17} /> Exit site
+          </button>
+          <div className="expanded-site portal-enter relative min-h-full overflow-visible rounded-xl border border-[#ffe6cb]/12 bg-black shadow-[0_40px_140px_rgba(0,0,0,.75)]">
             <SiteRenderer site={activeSite} expanded />
           </div>
         </div>
@@ -285,33 +365,34 @@ function PreviewCard({ site, index, onOpen }) {
   const Icon = site.Icon;
   return (
     <button
+      data-site-id={site.id}
       onClick={onOpen}
-      className="focus-visible-ring group glass relative grid min-h-[25rem] w-full overflow-hidden rounded-[2rem] text-left transition duration-500 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_38px_110px_rgba(0,0,0,.46)] lg:grid-cols-[23rem_1fr]"
+      className="focus-visible-ring group showroom-card relative grid min-h-[25rem] w-full overflow-hidden text-left transition duration-500 hover:-translate-y-1 hover:border-[#ffe6cb]/24 hover:bg-[#ffe6cb]/[0.045] lg:grid-cols-[21rem_1fr]"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div className="relative z-10 flex flex-col justify-between border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
+      <div className="relative z-10 flex flex-col justify-between border-b border-[#ffe6cb]/10 p-6 lg:border-b-0 lg:border-r">
         <div>
-          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: `${site.accent}22`, color: site.accent }}>
-            <Icon size={24} />
+          <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[#ffe6cb]/12 bg-[#ffe6cb]/[0.035]" style={{ color: site.accent }}>
+            <Icon size={22} />
           </div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/44">{site.category}</p>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.05em] text-white">{site.title}</h2>
-          <p className="mt-4 max-w-xs text-sm leading-6 text-white/62">{site.one}</p>
+          <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#ffe6cb]/44">{site.category}</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.045em] text-[#fff8ec] sm:text-3xl">{site.title}</h2>
+          <p className="mt-4 max-w-xs text-sm leading-6 text-[#ffe6cb]/58">{site.one}</p>
         </div>
-        <div className="mt-7 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em] text-white/50">
+        <div className="mt-7 flex items-center justify-between gap-4 text-[0.68rem] uppercase tracking-[0.16em] text-[#ffe6cb]/45">
           <span>{site.palette}</span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-white transition group-hover:border-white/35 group-hover:bg-white/10">
+          <span className="trace-button inline-flex items-center gap-2 text-[#fff8ec]">
             Enter <ArrowUpRight size={14} />
           </span>
         </div>
       </div>
       <div className="preview-mask relative h-[24rem] overflow-hidden lg:h-auto">
         <div className="absolute inset-x-0 top-0 origin-top scale-[0.74] sm:scale-[0.82] lg:scale-[0.78] xl:scale-[0.86]">
-          <div className="pointer-events-none h-[48rem] w-[128%] -translate-x-[11%] rounded-[2rem] border border-white/10 bg-black shadow-2xl">
+          <div className="pointer-events-none h-[48rem] w-[128%] -translate-x-[11%] rounded-xl border border-[#ffe6cb]/10 bg-black shadow-2xl">
             <SiteRenderer site={site} />
           </div>
         </div>
-        <div className="pointer-events-none absolute inset-x-6 bottom-5 z-20 rounded-full border border-white/15 bg-black/45 px-4 py-3 text-center text-xs font-bold uppercase tracking-[0.25em] text-white/72 backdrop-blur-xl">
+        <div className="pointer-events-none absolute inset-x-6 bottom-5 z-20 rounded-lg border border-[#ffe6cb]/12 bg-[#041c1c]/70 px-4 py-3 text-center text-[0.68rem] font-medium uppercase tracking-[0.2em] text-[#ffe6cb]/68 backdrop-blur-xl">
           homepage preview — opens inline
         </div>
       </div>
@@ -331,6 +412,39 @@ function SiteRenderer({ site, expanded = false }) {
     case 'luma': return <WellnessSite {...props} />;
     default: return null;
   }
+}
+
+function DepthSections({ tone }) {
+  const content = depthContent[tone];
+  const text = content.dark ? 'text-white' : 'text-[#17202a]';
+  const muted = content.dark ? 'text-white/62' : 'text-[#17202a]/62';
+  const card = content.dark
+    ? 'border-white/12 bg-white/[0.07] text-white backdrop-blur-xl'
+    : 'border-black/10 bg-white/55 text-[#17202a] shadow-xl shadow-black/10 backdrop-blur-xl';
+
+  return (
+    <section className={`depth-section depth-${tone} relative z-10 mx-auto max-w-6xl px-6 pb-24 ${text}`}>
+      <div className="grid gap-8 border-t border-current/10 pt-12 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.35em] opacity-55">{content.eyebrow}</p>
+          <h4 className="mt-4 max-w-2xl text-4xl font-black leading-[0.95] tracking-[-0.06em] sm:text-6xl">{content.title}</h4>
+        </div>
+        <p className={`max-w-xl text-base leading-7 sm:text-lg ${muted}`}>{content.copy}</p>
+      </div>
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
+        {content.items.map((item, i) => (
+          <article key={item} className={`min-h-44 rounded-[1.35rem] border p-5 ${card}`}>
+            <p className="text-xs uppercase tracking-[0.24em] opacity-45">0{i + 1}</p>
+            <h5 className="mt-8 text-2xl font-black tracking-[-0.04em]">{item}</h5>
+            <p className="mt-3 text-sm leading-6 opacity-58">Scroll depth module for a fuller homepage.</p>
+          </article>
+        ))}
+      </div>
+      <div className="mt-7 inline-flex rounded-xl border border-current/15 bg-current/10 px-5 py-3 text-sm font-black uppercase tracking-[0.14em]">
+        {content.cta}
+      </div>
+    </section>
+  );
 }
 
 function MiniNav({ dark = false, label = 'Studio' }) {
@@ -369,6 +483,7 @@ function GymSite({ expanded }) {
           ))}
         </div>
       </section>
+      <DepthSections tone="pulseforge" />
     </div>
   );
 }
@@ -399,6 +514,7 @@ function RealEstateSite() {
           </div>
         </div>
       </section>
+      <DepthSections tone="atlas" />
     </div>
   );
 }
@@ -425,6 +541,7 @@ function LandscapingSite() {
           ))}
         </div>
       </section>
+      <DepthSections tone="verdant" />
     </div>
   );
 }
@@ -449,6 +566,7 @@ function EcommerceSite({ expanded }) {
           </div>
         </div>
       </section>
+      <DepthSections tone="orbit" />
     </div>
   );
 }
@@ -473,6 +591,7 @@ function BlogSite() {
           ))}
         </div>
       </section>
+      <DepthSections tone="margin" />
     </div>
   );
 }
@@ -495,6 +614,7 @@ function RestaurantSite() {
           </div>
         </div>
       </section>
+      <DepthSections tone="ember" />
     </div>
   );
 }
@@ -519,6 +639,7 @@ function WellnessSite() {
           </div>
         </div>
       </section>
+      <DepthSections tone="luma" />
     </div>
   );
 }
