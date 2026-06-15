@@ -23,4 +23,4 @@ npm run cf:preview
 npm run deploy
 ```
 
-The Cloudflare worker is configured in `wrangler.jsonc` with `assets.directory = ./dist` and no custom domain.
+The Cloudflare Worker is configured in `wrangler.jsonc` with `assets.directory = ./dist` and no custom domain. `workers/github-assets-worker.js` is the API-deployed fallback Worker used from this environment when local Wrangler has no `CLOUDFLARE_API_TOKEN`; it serves the built `dist/` artifacts from this public repo through a real workers.dev Worker.
