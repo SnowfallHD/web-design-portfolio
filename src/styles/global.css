@@ -154,6 +154,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
   stroke-dashoffset: 1200;
   animation: draw 3.5s ease forwards;
 }
+.scroll-draw { overflow: visible; }
+.scroll-draw path {
+  transition: stroke-dashoffset .18s linear;
+  vector-effect: non-scaling-stroke;
+}
+.scroll-draw circle { fill: currentColor; opacity: .75; }
 
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes floaty { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-18px) rotate(1deg); } }
@@ -290,7 +296,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .orbit-specs p, .orbit-cart span { color: rgba(255,255,255,.58); line-height: 1.65; }
 .orbit-variants { padding: 2rem 3rem; display: flex; gap: .8rem; overflow-x: auto; }
 .orbit-variants button { min-width: 12rem; border: 1px solid rgba(255,255,255,.12); color: #fff; padding: 6rem 1rem 1rem; text-align: left; background: radial-gradient(circle at 50% 20%, var(--swatch), transparent 45%), rgba(255,255,255,.05); }
-.orbit-cart { margin: 3rem; display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end; border: 1px solid rgba(115,245,255,.14); }
+.orbit-cart { margin: 3rem; display: grid; grid-template-columns: .8fr 1fr 1fr auto; gap: 1rem; align-items: end; border: 1px solid rgba(115,245,255,.14); }
+.orbit-cart .brand-photo { height: 13rem; border: 1px solid rgba(115,245,255,.16); }
 .orbit-cart div { display: grid; gap: .7rem; }
 
 .margin-site { background: #f8f1e4; color: #21180f; font-family: Georgia, 'Times New Roman', serif; }

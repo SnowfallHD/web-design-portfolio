@@ -21,11 +21,54 @@ function progressFrom(el) {
 }
 
 function BrandImage({ site, className = '', alt, shade = true }) {
+  return <Photo src={site.image} alt={alt || `${site.title} brand photography`} className={className} shade={shade} />;
+}
+
+function Photo({ src, className = '', alt = '', shade = true }) {
   return (
     <div className={`brand-photo ${className}`}>
-      <img src={site.image} alt={alt || `${site.title} brand photography`} loading="lazy" />
+      <img src={src} alt={alt} loading="lazy" />
       {shade && <span className="brand-photo-shade" />}
     </div>
+  );
+}
+
+function ScrollDrawSvg({ viewBox, paths, progress = 0, className = '', children }) {
+  const refs = useRef([]);
+  const [lengths, setLengths] = useState([]);
+  const pathSignature = paths.map((path) => path.d).join('|');
+
+  useEffect(() => {
+    const measure = () => setLengths(refs.current.map((path) => path?.getTotalLength?.() || 1));
+    measure();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    refs.current.forEach((node) => node && ro?.observe(node));
+    window.addEventListener('resize', measure);
+    return () => { ro?.disconnect(); window.removeEventListener('resize', measure); };
+  }, [pathSignature]);
+
+  return (
+    <svg className={`scroll-draw ${className}`} viewBox={viewBox} fill="none" aria-hidden="true">
+      {paths.map((path, i) => {
+        const len = lengths[i] || 1;
+        const start = path.start ?? 0;
+        const end = path.end ?? 1;
+        const local = Math.min(1, Math.max(0, (progress - start) / Math.max(0.001, end - start)));
+        return (
+          <path
+            key={`${path.d}-${i}`}
+            ref={(node) => { refs.current[i] = node; }}
+            d={path.d}
+            stroke={path.stroke}
+            strokeWidth={path.strokeWidth || 4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ strokeDasharray: len, strokeDashoffset: len * (1 - local) }}
+          />
+        );
+      })}
+      {children}
+    </svg>
   );
 }
 
@@ -58,44 +101,39 @@ function ThreeScene({ variant = 'fly', active = false, scrollProgress = 0 }) {
     };
 
     if (variant === 'fly') {
-      scene.fog = new THREE.FogExp2('#050306', 0.034);
-      const ringGeo = new THREE.TorusGeometry(2.45, 0.018, 8, 112);
-      const gateGeo = new THREE.BoxGeometry(0.08, 2.9, 0.08);
-      const floorGeo = new THREE.PlaneGeometry(8, 1.1, 1, 1);
-      for (let i = 0; i < 42; i += 1) {
-        const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: i % 5 === 0 ? '#ffffff' : '#ff2d55', transparent: true, opacity: 0.12 + (i % 5) * 0.045, wireframe: true }));
-        ring.position.set(Math.sin(i * 0.7) * 0.55, Math.cos(i * 0.4) * 0.24, -i * 2.25);
-        ring.rotation.x = Math.PI / 2 + i * 0.05;
-        ring.rotation.z = i * 0.31;
-        scene.add(ring); objects.push({ mesh: ring, kind: 'ring', phase: i });
-        if (i % 6 === 0) {
-          const mat = new THREE.MeshBasicMaterial({ color: '#ff2d55', transparent: true, opacity: 0.32 });
-          [-1, 1].forEach((side) => {
-            const gate = new THREE.Mesh(gateGeo, mat.clone());
-            gate.position.set(side * (1.95 + (i % 3) * 0.16), 0, -i * 2.25 - 0.7);
-            gate.rotation.z = i * 0.12;
-            scene.add(gate); objects.push({ mesh: gate, kind: 'gate', phase: i });
-          });
-        }
-        if (i % 4 === 0) {
-          const floor = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.075, wireframe: true }));
-          floor.position.set(0, -1.7, -i * 2.25);
-          floor.rotation.x = -Math.PI / 2;
-          scene.add(floor); objects.push({ mesh: floor, kind: 'floor', phase: i });
-        }
+      scene.fog = new THREE.FogExp2('#050306', 0.028);
+      const wallMat = new THREE.MeshBasicMaterial({ color: '#11151b', transparent: true, opacity: 0.9 });
+      const glassMat = new THREE.MeshBasicMaterial({ color: '#27323b', transparent: true, opacity: 0.44, wireframe: true });
+      const redMat = new THREE.MeshBasicMaterial({ color: '#ff2d55', transparent: true, opacity: 0.82 });
+      const whiteMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 });
+      const darkMat = new THREE.MeshBasicMaterial({ color: '#050608', transparent: true, opacity: 0.95 });
+      const floorGeo = new THREE.BoxGeometry(7.8, 0.04, 2.05);
+      const wallGeo = new THREE.BoxGeometry(0.05, 2.55, 2.05);
+      const beamGeo = new THREE.BoxGeometry(7.8, 0.04, 0.08);
+      const laneGeo = new THREE.BoxGeometry(0.025, 0.035, 2.0);
+      const lightGeo = new THREE.BoxGeometry(1.1, 0.03, 0.18);
+      const signGeo = new THREE.PlaneGeometry(1.2, 0.34);
+      const rackGeo = new THREE.BoxGeometry(0.38, 1.35, 0.08);
+      const plateGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.05, 18);
+      const addMesh = (mesh, kind, phase = 0) => { scene.add(mesh); objects.push({ mesh, kind, phase }); return mesh; };
+      for (let i = 0; i < 38; i += 1) {
+        const z = -i * 2.05;
+        const floor = addMesh(new THREE.Mesh(floorGeo, wallMat.clone()), 'floor', i); floor.position.set(0, -1.72, z);
+        const leftWall = addMesh(new THREE.Mesh(wallGeo, i % 4 === 0 ? glassMat.clone() : wallMat.clone()), 'wall', i); leftWall.position.set(-3.9, -0.35, z);
+        const rightWall = addMesh(new THREE.Mesh(wallGeo, i % 5 === 0 ? glassMat.clone() : wallMat.clone()), 'wall', i); rightWall.position.set(3.9, -0.35, z);
+        const beam = addMesh(new THREE.Mesh(beamGeo, i % 3 === 0 ? redMat.clone() : whiteMat.clone()), 'beam', i); beam.position.set(0, 1.25, z - 0.85); beam.material.opacity = i % 3 === 0 ? 0.45 : 0.18;
+        [-1.15, 0, 1.15].forEach((x) => { const lane = addMesh(new THREE.Mesh(laneGeo, x === 0 ? redMat.clone() : whiteMat.clone()), 'lane', i); lane.position.set(x, -1.66, z); lane.material.opacity = x === 0 ? 0.62 : 0.24; });
+        if (i % 4 === 1) { const light = addMesh(new THREE.Mesh(lightGeo, redMat.clone()), 'light', i); light.position.set(-2.15, 1.18, z); const light2 = addMesh(new THREE.Mesh(lightGeo, whiteMat.clone()), 'light', i); light2.position.set(2.15, 1.18, z); }
+        if (i % 6 === 2) { const sign = addMesh(new THREE.Mesh(signGeo, redMat.clone()), 'sign', i); sign.position.set(-3.86, 0.75, z); sign.rotation.y = Math.PI / 2; }
+        if (i % 7 === 3) { [-3.25, 3.25].forEach((x, side) => { const rack = addMesh(new THREE.Mesh(rackGeo, darkMat.clone()), 'equipment', i); rack.position.set(x, -0.95, z - 0.35); const bar = addMesh(new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.05, 0.05), whiteMat.clone()), 'equipment', i); bar.position.set(x + (side ? -0.2 : 0.2), -0.55, z - 0.35); [-0.34, 0.34].forEach((dy) => { const plate = addMesh(new THREE.Mesh(plateGeo, redMat.clone()), 'equipment', i); plate.position.set(x, -0.55 + dy, z - 0.32); plate.rotation.z = Math.PI / 2; }); }); }
+        if (i % 9 === 0) { const doorway = addMesh(new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.9, 0.05), glassMat.clone()), 'doorway', i); doorway.position.set(i % 18 === 0 ? -3.88 : 3.88, -0.45, z - 0.7); doorway.rotation.y = Math.PI / 2; }
       }
       const particleGeo = new THREE.BufferGeometry();
-      const count = 1800;
+      const count = 520;
       const pos = new Float32Array(count * 3);
-      for (let i = 0; i < count; i += 1) {
-        const r = 1.3 + Math.random() * 5.5;
-        const a = Math.random() * Math.PI * 2;
-        pos[i * 3] = Math.cos(a) * r;
-        pos[i * 3 + 1] = Math.sin(a) * r * 0.55;
-        pos[i * 3 + 2] = -Math.random() * 96;
-      }
+      for (let i = 0; i < count; i += 1) { pos[i * 3] = (Math.random() - 0.5) * 6.6; pos[i * 3 + 1] = -1.45 + Math.random() * 2.25; pos[i * 3 + 2] = -Math.random() * 78; }
       particleGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: '#ffffff', size: 0.026, transparent: true, opacity: 0.6 }));
+      const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: '#ffffff', size: 0.018, transparent: true, opacity: 0.35 }));
       scene.add(particles); objects.push({ mesh: particles, kind: 'particles', phase: 0 });
     } else {
       const geometry = new THREE.IcosahedronGeometry(1.6, 96);
@@ -158,16 +196,19 @@ function ThreeScene({ variant = 'fly', active = false, scrollProgress = 0 }) {
       const p = active ? progress.current : 0;
       uniforms.uTime.value = t; uniforms.uScroll.value = p; uniforms.uMouse.value.set(mouse.current.x, mouse.current.y);
       if (variant === 'fly') {
-        camera.position.x += (Math.sin(p * 7.2) * 1.25 + mouse.current.x * 0.35 - camera.position.x) * 0.05;
-        camera.position.y += (Math.cos(p * 4.8) * 0.55 + mouse.current.y * 0.24 - camera.position.y) * 0.05;
-        camera.position.z += (12 - p * 75 - camera.position.z) * 0.08;
-        camera.lookAt(Math.sin(p * 8) * 1.2, Math.cos(p * 5.4) * 0.35, camera.position.z - 17);
+        camera.position.x += (Math.sin(p * 5.6) * 0.72 + mouse.current.x * 0.22 - camera.position.x) * 0.055;
+        camera.position.y += (-0.34 + Math.sin(p * 3.8) * 0.18 + mouse.current.y * 0.16 - camera.position.y) * 0.055;
+        camera.position.z += (11.5 - p * 68 - camera.position.z) * 0.08;
+        camera.lookAt(Math.sin(p * 5.4) * 0.58, -0.42 + Math.cos(p * 3.2) * 0.14, camera.position.z - 13);
         objects.forEach(({ mesh, kind, phase }, i) => {
-          if (kind === 'ring') { mesh.rotation.z += 0.004 + p * 0.018; mesh.material.opacity = 0.1 + Math.max(0, Math.sin((p * 42 - phase) * 0.7)) * 0.42; }
-          if (kind === 'gate') { mesh.rotation.z += 0.003; mesh.scale.y = 1 + Math.max(0, Math.sin((p * 42 - phase) * 0.85)) * 0.7; }
-          if (kind === 'floor') mesh.material.opacity = 0.045 + Math.max(0, Math.sin((p * 42 - phase) * 0.55)) * 0.12;
-          if (kind === 'particles') { mesh.rotation.z += 0.0008 + p * 0.002; mesh.rotation.y += 0.00045; }
-          if (i % 8 === 0) mesh.position.x += Math.sin(t + i) * 0.0008;
+          const station = Math.max(0, Math.sin((p * 38 - phase) * 0.72));
+          if (kind === 'floor') mesh.material.opacity = 0.72 + station * 0.18;
+          if (kind === 'wall') mesh.material.opacity = 0.42 + station * 0.2;
+          if (kind === 'beam' || kind === 'light') mesh.material.opacity = 0.16 + station * 0.62;
+          if (kind === 'lane') mesh.material.opacity = 0.16 + station * 0.5;
+          if (kind === 'sign' || kind === 'doorway') mesh.material.opacity = 0.22 + station * 0.54;
+          if (kind === 'equipment') mesh.rotation.y += Math.sin(t + i) * 0.0004;
+          if (kind === 'particles') { mesh.rotation.y += 0.00035; mesh.material.opacity = 0.24 + Math.sin(t * 0.7) * 0.06; }
         });
       } else {
         objects.forEach(({ mesh, kind, phase }) => {
@@ -252,22 +293,28 @@ function PortfolioApp() {
 
 function PreviewCard({ site, index, onOpen }) {
   const Icon = site.Icon;
+  const onKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onOpen();
+    }
+  };
   return (
-    <button data-site-id={site.id} onClick={onOpen} className="focus-visible-ring group showroom-card relative grid min-h-[28rem] w-full overflow-hidden text-left transition duration-500 hover:-translate-y-1 hover:border-[#ffe6cb]/24 hover:bg-[#ffe6cb]/[0.045] lg:grid-cols-[21rem_1fr]" style={{ animationDelay: `${index * 80}ms` }}>
+    <article data-site-id={site.id} role="button" tabIndex={0} onClick={onOpen} onKeyDown={onKeyDown} className="focus-visible-ring group showroom-card relative grid min-h-[28rem] w-full cursor-pointer overflow-hidden text-left transition duration-500 hover:-translate-y-1 hover:border-[#ffe6cb]/24 hover:bg-[#ffe6cb]/[0.045] lg:grid-cols-[21rem_1fr]" style={{ animationDelay: `${index * 80}ms` }}>
       <div className="relative z-10 flex flex-col justify-between border-b border-[#ffe6cb]/10 p-6 lg:border-b-0 lg:border-r">
         <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[#ffe6cb]/12 bg-[#ffe6cb]/[0.035]" style={{ color: site.accent }}><Icon size={22} /></div><p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#ffe6cb]/44">{site.category}</p><h2 className="mt-3 text-2xl font-semibold tracking-[-0.045em] text-[#fff8ec] sm:text-3xl">{site.title}</h2><p className="mt-4 max-w-xs text-sm leading-6 text-[#ffe6cb]/58">{site.one}</p></div>
         <div className="mt-7 flex items-center justify-between gap-4 text-[0.68rem] uppercase tracking-[0.16em] text-[#ffe6cb]/45"><span>{site.palette}</span><span className="trace-button inline-flex items-center gap-2 text-[#fff8ec]">Enter <ArrowUpRight size={14} /></span></div>
       </div>
       <div className="preview-mask relative h-[27rem] overflow-hidden lg:h-auto"><div className="absolute inset-x-0 top-0 origin-top scale-[0.62] sm:scale-[0.72] lg:scale-[0.66] xl:scale-[0.74]"><div className="pointer-events-none h-[70rem] w-[142%] -translate-x-[15%] rounded-xl border border-[#ffe6cb]/10 bg-black shadow-2xl"><SiteRenderer site={site} /></div></div><div className="pointer-events-none absolute inset-x-6 bottom-5 z-20 rounded-lg border border-[#ffe6cb]/12 bg-[#041c1c]/70 px-4 py-3 text-center text-[0.68rem] font-medium uppercase tracking-[0.2em] text-[#ffe6cb]/68 backdrop-blur-xl">standalone brand demo — opens inline</div></div>
-    </button>
+    </article>
   );
 }
 
 function SiteRenderer({ site, expanded = false, scrollProgress = 0 }) {
   switch (site.id) {
     case 'pulseforge': return <PulseForge site={site} expanded={expanded} scrollProgress={scrollProgress} />;
-    case 'atlas': return <AtlasEstate site={site} />;
-    case 'verdant': return <VerdantWorks site={site} />;
+    case 'atlas': return <AtlasEstate site={site} scrollProgress={scrollProgress} />;
+    case 'verdant': return <VerdantWorks site={site} scrollProgress={scrollProgress} />;
     case 'orbit': return <OrbitSupply site={site} expanded={expanded} scrollProgress={scrollProgress} />;
     case 'margin': return <TheMargin site={site} />;
     case 'ember': return <EmberTable site={site} />;
@@ -277,31 +324,43 @@ function SiteRenderer({ site, expanded = false, scrollProgress = 0 }) {
 }
 
 function PulseForge({ site, expanded, scrollProgress }) {
-  return <div className="site-canvas pulse-site text-white"><ThreeScene variant="fly" active={expanded} scrollProgress={scrollProgress} /><nav className="pulse-nav"><b>PF/06</b><span>Zones</span><span>Coaches</span><span>Recovery</span><button>Trial pass</button></nav><section className="pulse-hero"><BrandImage site={site} className="pulse-photo" /><div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>See tonight's classes</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section><section className="pulse-zones"><h4>Move through the building.</h4>{['Engine Room', 'Iron Floor', 'Recovery Lab', 'Sprint Turf'].map((z, i) => <article key={z}><span>0{i+1}</span><h5>{z}</h5><p>{['Intervals, sled pushes, ropes, assault bikes, and heart-rate based coaching.', 'Olympic racks, dumbbell bays, spotter-led strength blocks, and form checks.', 'Cold plunge, compression, breath tables, and post-session mobility.', 'Speed work, jumps, carries, and small-group conditioning.'][i]}</p></article>)}</section><section className="pulse-coaches"><div><h4>Coaches who correct you before the rep gets ugly.</h4><p>Book a trial and train with a floor lead, not a sales rep. Every session starts with movement screening and ends with a recovery recommendation.</p></div>{['Mara — Strength', 'Dev — Conditioning', 'Anika — Mobility'].map((c) => <span key={c}>{c}</span>)}</section><section className="pulse-pricing"><h4>Choose the rhythm.</h4>{['Trial week / $0', 'Unlimited / $189 mo', 'Semi-private / $340 mo'].map((p) => <article key={p}><h5>{p}</h5><p>Includes coaching notes, class booking, and recovery access.</p></article>)}</section></div>;
+  return <div className="site-canvas pulse-site text-white"><ThreeScene variant="fly" active={expanded} scrollProgress={scrollProgress} /><nav className="pulse-nav"><b>PF/06</b><span>Zones</span><span>Coaches</span><span>Recovery</span><button>Trial pass</button></nav><section className="pulse-hero"><BrandImage site={site} className="pulse-photo" /><div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>See tonight's classes</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section><section className="pulse-zones"><h4>Follow the floor plan.</h4>{['Engine Room', 'Iron Floor', 'Recovery Lab', 'Sprint Turf'].map((z, i) => <article key={z}><span>0{i+1}</span><h5>{z}</h5><p>{['Intervals, sled pushes, ropes, assault bikes, and heart-rate based coaching.', 'Olympic racks, dumbbell bays, spotter-led strength blocks, and form checks.', 'Cold plunge, compression, breath tables, and post-session mobility.', 'Speed work, jumps, carries, and small-group conditioning.'][i]}</p></article>)}</section><section className="pulse-coaches"><div><h4>Coaches who correct you before the rep gets ugly.</h4><p>Book a trial and train with a floor lead, not a sales rep. Every session starts with movement screening and ends with a recovery recommendation.</p></div>{['Mara — Strength', 'Dev — Conditioning', 'Anika — Mobility'].map((c) => <span key={c}>{c}</span>)}</section><section className="pulse-pricing"><h4>Choose the rhythm.</h4>{['Trial week / $0', 'Unlimited / $189 mo', 'Semi-private / $340 mo'].map((p) => <article key={p}><h5>{p}</h5><p>Includes coaching notes, class booking, and recovery access.</p></article>)}</section></div>;
 }
 
-function AtlasEstate({ site }) {
-  return <div className="site-canvas atlas-site"><nav className="atlas-nav"><span>Atlas Estate</span><span>Private list · Coastal advisory · Buyer concierge</span></nav><section className="atlas-hero"><div className="atlas-title"><p>By-appointment coastal brokerage</p><h3>Homes that rarely reach the open market.</h3><button>Request the private list</button></div><BrandImage site={site} className="atlas-photo" /><aside><strong>$4.8M</strong><span>average private transaction</span><strong>37</strong><span>quiet listings this quarter</span></aside></section><section className="atlas-route"><svg viewBox="0 0 900 320"><path className="draw-line" d="M40 260 C 180 80, 320 240, 450 120 S 680 80, 850 210" /><circle cx="450" cy="120" r="8" /><circle cx="710" cy="130" r="8" /></svg><div><h4>A guided route through neighborhoods, not a feed of listings.</h4><p>We start with schools, shoreline, privacy, guest-house rules, airport time, and the difference between beautiful photos and a livable week.</p></div></section><section className="atlas-listings">{['Glass House No. 8', 'Cliff Road Villa', 'Juniper Courtyard'].map((l, i) => <article key={l}><BrandImage site={site} shade={false} /><p>Private residence 0{i+1}</p><h5>{l}</h5><span>{['$6.2M · 4 bed · ocean path', '$8.9M · gated bluff', '$3.7M · courtyard retreat'][i]}</span></article>)}</section><section className="atlas-intake"><h4>Tell us what should never hit Zillow.</h4><div>{['Budget range', 'Timeline', 'School / commute', 'Privacy needs'].map((f) => <span key={f}>{f}</span>)}</div><button>Begin buyer intake</button></section></div>;
+function AtlasEstate({ site, scrollProgress }) {
+  const listings = [
+    ['Glass House No. 8', '$6.2M · 4 bed · ocean path', '/brand-images/atlas-interior.webp'],
+    ['Cliff Road Villa', '$8.9M · gated bluff', '/brand-images/atlas-cliff-villa.webp'],
+    ['Juniper Courtyard', '$3.7M · courtyard retreat', '/brand-images/atlas-courtyard.webp'],
+  ];
+  return <div className="site-canvas atlas-site"><nav className="atlas-nav"><span>Atlas Estate</span><span>Private list · Coastal advisory · Buyer concierge</span></nav><section className="atlas-hero"><div className="atlas-title"><p>By-appointment coastal brokerage</p><h3>Homes that rarely reach the open market.</h3><button>Request the private list</button></div><BrandImage site={site} className="atlas-photo" /><aside><strong>$4.8M</strong><span>average private transaction</span><strong>37</strong><span>quiet listings this quarter</span></aside></section><section className="atlas-route"><ScrollDrawSvg viewBox="0 0 900 320" progress={scrollProgress} paths={[{ d: 'M40 260 C 180 80, 320 240, 450 120 S 680 80, 850 210', stroke: '#c7985c', strokeWidth: 5, start: .08, end: .42 }]}><circle cx="450" cy="120" r="8" /><circle cx="710" cy="130" r="8" /></ScrollDrawSvg><div><h4>A guided route through neighborhoods, not a feed of listings.</h4><p>We start with schools, shoreline, privacy, guest-house rules, airport time, and the difference between beautiful photos and a livable week.</p></div></section><section className="atlas-listings">{listings.map(([name, meta, src]) => <article key={name}><Photo src={src} alt={`${name} property photography`} shade={false} /><p>Private residence</p><h5>{name}</h5><span>{meta}</span></article>)}</section><section className="atlas-intake"><h4>Tell us what should never hit Zillow.</h4><div>{['Budget range', 'Timeline', 'School / commute', 'Privacy needs'].map((f) => <span key={f}>{f}</span>)}</div><button>Begin buyer intake</button></section></div>;
 }
 
-function VerdantWorks({ site }) {
-  return <div className="site-canvas verdant-site"><header><div><p>Outdoor rooms for real weather</p><h3>Courtyards, patios, and native gardens that settle in beautifully.</h3><button>Schedule a yard walk</button></div><BrandImage site={site} /></header><section className="verdant-plan"><div><h4>From rough lot to living plan.</h4><p>We map shade, drainage, privacy, circulation, and plant maintenance before anyone starts hauling stone.</p></div><svg viewBox="0 0 620 360"><path className="draw-line" d="M62 290 C150 120 260 295 365 105 S530 80 578 230" /><path className="draw-line delay" d="M95 175 C190 210 310 110 500 150" /></svg></section><section className="verdant-wipe">{['Before: patchy slope', 'After: stone steps + meadow', 'Care: monthly cutback'].map((x) => <article key={x}><BrandImage site={site} shade={false} /><h5>{x}</h5></article>)}</section><section className="verdant-services"><h4>What homeowners actually need.</h4>{['Outdoor room design', 'Native planting', 'Stone + water', 'Seasonal care plans', 'Lighting', 'Storm cleanup'].map((s) => <span key={s}>{s}</span>)}</section><section className="verdant-estimate"><h4>Get a useful estimate.</h4><p>Send yard size, photos, sun exposure, budget range, and the outdoor room you wish existed.</p><button>Start estimate</button></section></div>;
+
+function VerdantWorks({ site, scrollProgress }) {
+  const transformations = [
+    ['Before: patchy slope', '/brand-images/verdant-before.webp'],
+    ['After: stone steps + meadow', '/brand-images/verdant-after.webp'],
+    ['Care: monthly cutback', '/brand-images/verdant-care.webp'],
+  ];
+  return <div className="site-canvas verdant-site"><header><div><p>Outdoor rooms for real weather</p><h3>Courtyards, patios, and native gardens that settle in beautifully.</h3><button>Schedule a yard walk</button></div><BrandImage site={site} /></header><section className="verdant-plan"><div><h4>From rough lot to living plan.</h4><p>We map shade, drainage, privacy, circulation, and plant maintenance before anyone starts hauling stone.</p></div><ScrollDrawSvg viewBox="0 0 620 360" progress={scrollProgress} paths={[{ d: 'M62 290 C150 120 260 295 365 105 S530 80 578 230', stroke: '#486b32', strokeWidth: 6, start: .1, end: .46 }, { d: 'M95 175 C190 210 310 110 500 150', stroke: '#9c6d3c', strokeWidth: 3, start: .22, end: .58 }]} /></section><section className="verdant-wipe">{transformations.map(([x, src]) => <article key={x}><Photo src={src} alt={`${x} landscaping photography`} shade={false} /><h5>{x}</h5></article>)}</section><section className="verdant-services"><h4>What homeowners actually need.</h4>{['Outdoor room design', 'Native planting', 'Stone + water', 'Seasonal care plans', 'Lighting', 'Storm cleanup'].map((service) => <span key={service}>{service}</span>)}</section><section className="verdant-estimate"><h4>Get a useful estimate.</h4><p>Send yard size, photos, sun exposure, budget range, and the outdoor room you wish existed.</p><button>Start estimate</button></section></div>;
 }
+
 
 function OrbitSupply({ site, expanded, scrollProgress }) {
-  return <div className="site-canvas orbit-site text-white"><nav><span>ORBIT SUPPLY / DROP 04</span><button>Cart — $248</button></nav><section className="orbit-hero"><div><p>Adaptive carry system</p><h3>AeroShell Pack</h3><p>Weather shell, carbon frame, removable grid pouch, and strap hardware built for commuters who pack like field operators.</p><button>Reserve the drop</button></div><div className="orbit-object"><BrandImage site={site} shade={false} /><ThreeScene variant="morph" active={expanded} scrollProgress={scrollProgress} /></div></section><section className="orbit-specs"><h4>Material states change with the day.</h4>{['Iridescent rain shell', 'Carbon load frame', 'Magnetic grid pouch', 'Thermal laptop sleeve'].map((s) => <article key={s}><h5>{s}</h5><p>Scroll the object: seams pull open, shell bands shift, and the silhouette gets more technical.</p></article>)}</section><section className="orbit-variants">{['Graphite', 'Ion blue', 'Field clay', 'Night violet'].map((v, i) => <button key={v} style={{ '--swatch': ['#24262d','#73f5ff','#9b7b5a','#7d5cff'][i] }}>{v}</button>)}</section><section className="orbit-cart"><h4>Build the kit.</h4><div>{['AeroShell Pack — $248', 'Grid pouch — $48', 'Rain skin — $36'].map((i) => <span key={i}>{i}</span>)}</div><button>Checkout mockup</button></section></div>;
+  return <div className="site-canvas orbit-site text-white"><nav><span>ORBIT SUPPLY / DROP 04</span><button>Cart — $248</button></nav><section className="orbit-hero"><div><p>Adaptive carry system</p><h3>AeroShell Pack</h3><p>Weather shell, carbon frame, removable grid pouch, and strap hardware built for commuters who pack like field operators.</p><button>Reserve the drop</button></div><div className="orbit-object"><BrandImage site={site} shade={false} /><ThreeScene variant="morph" active={expanded} scrollProgress={scrollProgress} /></div></section><section className="orbit-specs"><h4>Material states change with the day.</h4>{['Iridescent rain shell', 'Carbon load frame', 'Magnetic grid pouch', 'Thermal laptop sleeve'].map((s) => <article key={s}><h5>{s}</h5><p>Scroll the object: seams pull open, shell bands shift, and the silhouette gets more technical.</p></article>)}</section><section className="orbit-variants">{['Graphite', 'Ion blue', 'Field clay', 'Night violet'].map((v, i) => <button key={v} style={{ '--swatch': ['#24262d','#73f5ff','#9b7b5a','#7d5cff'][i] }}>{v}</button>)}</section><section className="orbit-cart"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply packaging and components" shade={false} /><h4>Build the kit.</h4><div>{['AeroShell Pack — $248', 'Grid pouch — $48', 'Rain skin — $36'].map((i) => <span key={i}>{i}</span>)}</div><button>Checkout mockup</button></section></div>;
 }
 
 function TheMargin({ site }) {
-  return <div className="site-canvas margin-site"><section className="margin-mast"><p>Issue 09 / Work, attention, small teams</p><h3>The Margin</h3><BrandImage site={site} className="margin-cover" /></section><section className="margin-lede"><article><span>Cover essay</span><h4>The craft hiding in boring tools.</h4><p>Why useful software often looks quiet before it becomes indispensable.</p></article><article><span>Interview</span><h4>Small teams, big taste.</h4><p>A conversation on constraint, distribution, and refusing generic polish.</p></article></section><section className="margin-rail"><h4>Read the issue</h4>{['Field notes', 'Essays', 'Interviews', 'Archive', 'Letters'].map((c) => <span key={c}>{c}</span>)}</section><section className="margin-layout"><div><h4>A slower place to read about building.</h4><p>Monthly issue, editor notes, research links, and a small archive that rewards returning instead of refreshing.</p><button>Subscribe for the next issue</button></div><BrandImage site={site} shade={false} /></section></div>;
+  return <div className="site-canvas margin-site"><section className="margin-mast"><p>Issue 09 / Work, attention, small teams</p><h3>The Margin</h3><BrandImage site={site} className="margin-cover" /></section><section className="margin-lede"><article><span>Cover essay</span><h4>The craft hiding in boring tools.</h4><p>Why useful software often looks quiet before it becomes indispensable.</p></article><article><span>Interview</span><h4>Small teams, big taste.</h4><p>A conversation on constraint, distribution, and refusing generic polish.</p></article></section><section className="margin-rail"><h4>Read the issue</h4>{['Field notes', 'Essays', 'Interviews', 'Archive', 'Letters'].map((c) => <span key={c}>{c}</span>)}</section><section className="margin-layout"><div><h4>A slower place to read about building.</h4><p>Monthly issue, editor notes, research links, and a small archive that rewards returning instead of refreshing.</p><button>Subscribe for the next issue</button></div><Photo src="/brand-images/margin-spread.webp" alt="The Margin open issue spread" shade={false} /></section></div>;
 }
 
 function EmberTable({ site }) {
-  return <div className="site-canvas ember-site text-white"><section className="ember-hero"><BrandImage site={site} /><nav><span>Ember Table</span><button>Reserve</button></nav><div><p>Wood fire dining · East side</p><h3>Smoke, citrus, and a table close to the hearth.</h3><button>Reserve tonight</button></div></section><section className="ember-courses"><h4>Tonight's tasting sequence</h4>{['Hearth bread + cultured butter', 'Charred citrus salad', 'Coal-roasted chicken', 'Saffron panna cotta'].map((c, i) => <article key={c}><span>{i+1}</span><h5>{c}</h5><p>{['Warm pull-apart loaf, black salt.', 'Bitter greens, ember oil, orange.', 'Fermented chili, winter herbs.', 'Olive oil, sea salt, smoke.'][i]}</p></article>)}</section><section className="ember-room"><BrandImage site={site} shade={false} /><div><h4>The room glows differently after 7pm.</h4><p>Counter seats face the fire. Booths are quieter. Private dining takes over the back room for twelve.</p></div></section><section className="ember-reserve"><h4>Book dinner or private fire-room events.</h4><div>{['Party size', 'Date', 'Occasion', 'Dietary notes'].map((f) => <span key={f}>{f}</span>)}</div><button>Find a table</button></section></div>;
+  return <div className="site-canvas ember-site text-white"><section className="ember-hero"><BrandImage site={site} /><nav><span>Ember Table</span><button>Reserve</button></nav><div><p>Wood fire dining · East side</p><h3>Smoke, citrus, and a table close to the hearth.</h3><button>Reserve tonight</button></div></section><section className="ember-courses"><h4>Tonight's tasting sequence</h4>{['Hearth bread + cultured butter', 'Charred citrus salad', 'Coal-roasted chicken', 'Saffron panna cotta'].map((c, i) => <article key={c}><span>{i+1}</span><h5>{c}</h5><p>{['Warm pull-apart loaf, black salt.', 'Bitter greens, ember oil, orange.', 'Fermented chili, winter herbs.', 'Olive oil, sea salt, smoke.'][i]}</p></article>)}</section><section className="ember-room"><Photo src="/brand-images/ember-room.webp" alt="Ember Table dining room and hearth" shade={false} /><div><h4>The room glows differently after 7pm.</h4><p>Counter seats face the fire. Booths are quieter. Private dining takes over the back room for twelve.</p></div></section><section className="ember-reserve"><h4>Book dinner or private fire-room events.</h4><div>{['Party size', 'Date', 'Occasion', 'Dietary notes'].map((f) => <span key={f}>{f}</span>)}</div><button>Find a table</button></section></div>;
 }
 
 function LumaSpa({ site }) {
-  return <div className="site-canvas luma-site"><section className="luma-hero"><div><p>Skin · sauna · nervous system</p><h3>Leave quieter than you arrived.</h3><p>Guided treatments, warm rooms, practitioner-led rituals, and booking that feels as calm as the visit.</p><button>Find your treatment</button></div><BrandImage site={site} shade={false} /></section><section className="luma-breathe"><div className="breath-orb" /><h4>Start with how you want to feel.</h4><div>{['Reset tension', 'Calm skin', 'Recover deeply', 'Gift a ritual'].map((x) => <span key={x}>{x}</span>)}</div></section><section className="luma-treatments">{['The Quiet Facial', 'Sauna + cold rinse', 'Stone table recovery', 'Monthly glow membership'].map((t) => <article key={t}><BrandImage site={site} shade={false} /><h5>{t}</h5><p>Soft light, practitioner notes, duration, and what to expect.</p></article>)}</section><section className="luma-book"><h4>Book without rushing.</h4><p>Choose pressure, focus, room preference, and practitioner. Gift cards and memberships live beside the same calm booking path.</p><button>Open booking mockup</button></section></div>;
+  return <div className="site-canvas luma-site"><section className="luma-hero"><div><p>Skin · sauna · nervous system</p><h3>Leave quieter than you arrived.</h3><p>Guided treatments, warm rooms, practitioner-led rituals, and booking that feels as calm as the visit.</p><button>Find your treatment</button></div><BrandImage site={site} shade={false} /></section><section className="luma-breathe"><div className="breath-orb" /><h4>Start with how you want to feel.</h4><div>{['Reset tension', 'Calm skin', 'Recover deeply', 'Gift a ritual'].map((x) => <span key={x}>{x}</span>)}</div></section><section className="luma-treatments">{[['The Quiet Facial', '/brand-images/luma-facial.webp'], ['Sauna + cold rinse', '/brand-images/luma-sauna.webp'], ['Stone table recovery', '/brand-images/luma-stone.webp'], ['Monthly glow membership', '/brand-images/luma-membership.webp']].map(([t, src]) => <article key={t}><Photo src={src} alt={`${t} ritual photography`} shade={false} /><h5>{t}</h5><p>Soft light, practitioner notes, duration, and what to expect.</p></article>)}</section><section className="luma-book"><h4>Book without rushing.</h4><p>Choose pressure, focus, room preference, and practitioner. Gift cards and memberships live beside the same calm booking path.</p><button>Open booking mockup</button></section></div>;
 }
 
 export default PortfolioApp;
