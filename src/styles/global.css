@@ -212,7 +212,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .pulse-site { background: #050507; font-family: 'Arial Narrow', 'Roboto Condensed', Impact, system-ui, sans-serif; }
 .pulse-site .three-shell { opacity: .86; mix-blend-mode: screen; }
-.pulse-site-walkthrough { position: relative; }
+.pulse-site-walkthrough, .site-canvas.pulse-site-walkthrough { position: relative; overflow: visible; }
 .pulse-walk-stage { position: relative; height: 560vh; min-height: 260rem; background: #050507; }
 .pulse-walkthrough { position: sticky; top: 0; z-index: 0; height: 100dvh; min-height: 42rem; overflow: hidden; background: radial-gradient(circle at 55% 30%, rgba(255,45,85,.12), transparent 34rem), #050507; }
 .pulse-walkthrough-canvas { position: absolute; inset: 0; }
