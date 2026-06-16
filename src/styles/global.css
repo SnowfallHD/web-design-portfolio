@@ -214,8 +214,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .pulse-site .three-shell { opacity: .86; mix-blend-mode: screen; }
 .pulse-site-walkthrough, .site-canvas.pulse-site-walkthrough { position: relative; overflow: visible; }
 .pulse-walk-stage { position: relative; height: 560vh; min-height: 260rem; background: #050507; }
-.pulse-walkthrough { position: sticky; top: 0; z-index: 0; height: 100dvh; min-height: 42rem; overflow: hidden; background: radial-gradient(circle at 55% 30%, rgba(255,45,85,.12), transparent 34rem), #050507; }
-.pulse-walkthrough-canvas { position: absolute; inset: 0; }
+.pulse-walkthrough { position: sticky; top: 0; z-index: 0; height: 100dvh; min-height: 42rem; overflow: hidden; background: #050507; }
+.pulse-walkthrough-photo { position: absolute; inset: -6%; z-index: 0; background-image: linear-gradient(90deg, rgba(0,0,0,.18), transparent 28%, transparent 72%, rgba(0,0,0,.28)), url('/brand-images/pulseforge-hyperreal-gym.webp'); background-size: cover; background-position: var(--walk-focus) 50%; transform: translate3d(var(--walk-x), var(--walk-y), 0) scale(var(--walk-scale)); transform-origin: 54% 56%; filter: saturate(1.04) contrast(1.05) brightness(.82); transition: transform .08s linear, background-position .08s linear; }
+.pulse-walkthrough-photo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 62% 52%, transparent 0 28%, rgba(0,0,0,.08) 42%, rgba(0,0,0,.5) 100%), linear-gradient(0deg, rgba(0,0,0,.42), transparent 42%, rgba(0,0,0,.22)); }
+.pulse-walkthrough-depth { position: absolute; z-index: 1; pointer-events: none; opacity: .5; background-image: url('/brand-images/pulseforge-hyperreal-gym.webp'); background-size: cover; background-position: var(--walk-focus) 50%; mix-blend-mode: screen; filter: contrast(1.25) saturate(1.05); }
+.pulse-walkthrough-depth.depth-a { inset: 6% 56% 15% -8%; transform: translate3d(var(--walk-x-a), var(--walk-y-a), 0) scale(var(--walk-scale-a)); clip-path: polygon(0 0, 100% 0, 74% 100%, 0 100%); opacity: .16; }
+.pulse-walkthrough-depth.depth-b { inset: 4% -6% 18% 62%; transform: translate3d(var(--walk-x-b), var(--walk-y-b), 0) scale(var(--walk-scale-b)); clip-path: polygon(23% 0, 100% 0, 100% 100%, 0 100%); opacity: .12; }
+.pulse-walkthrough-canvas { position: absolute; inset: 0; z-index: 2; mix-blend-mode: screen; opacity: .24; }
 .pulse-walkthrough canvas { display: block; width: 100% !important; height: 100% !important; }
 .pulse-walkthrough::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.55), transparent 36%, transparent 72%, rgba(0,0,0,.44)), linear-gradient(0deg, rgba(0,0,0,.42), transparent 34%, rgba(0,0,0,.18)); }
 .pulse-walkthrough-fallback, .pulse-walkthrough-loading { position: sticky; top: 0; z-index: 1; min-height: 100dvh; display: grid; place-items: center; color: rgba(255,255,255,.76); text-transform: uppercase; letter-spacing: .14em; background: linear-gradient(135deg,#07070a,#151014); }

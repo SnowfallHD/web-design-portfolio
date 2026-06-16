@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ArrowUpRight, Dumbbell, Home, Leaf, ShoppingBag, Newspaper, Utensils, Waves, X } from 'lucide-react';
 
 const sites = [
-  { id: 'pulseforge', title: 'PulseForge', category: 'Performance gym', palette: 'Redline / steel / sweat', accent: '#ff2d55', image: '/brand-images/pulseforge-gym.webp', Icon: Dumbbell, one: 'A high-performance training club built around intensity, coaching, recovery, and trial-pass conversion.' },
+  { id: 'pulseforge', title: 'PulseForge', category: 'Performance gym', palette: 'Redline / steel / sweat', accent: '#ff2d55', image: '/brand-images/pulseforge-hyperreal-gym.webp', Icon: Dumbbell, one: 'A high-performance training club built around intensity, coaching, recovery, and trial-pass conversion.' },
   { id: 'atlas', title: 'Atlas Estate', category: 'Luxury real estate', palette: 'Limestone / ink / brass', accent: '#b78342', image: '/brand-images/atlas-estate.webp', Icon: Home, one: 'A private coastal brokerage with editorial property photography, route maps, off-market inventory, and concierge intake.' },
   { id: 'verdant', title: 'Verdant Works', category: 'Outdoor living', palette: 'Moss / clay / cedar', accent: '#7ba95b', image: '/brand-images/verdant-works.webp', Icon: Leaf, one: 'A grounded landscaping company showing real transformations, planting logic, seasonal care, and estimate flow.' },
   { id: 'orbit', title: 'Orbit Supply', category: 'Product drop', palette: 'Graphite / optic cyan / violet', accent: '#73f5ff', image: '/brand-images/orbit-supply.webp', Icon: ShoppingBag, one: 'A technical gear drop with product photography, shader-morphing object, variants, specs, bundles, and cart state.' },

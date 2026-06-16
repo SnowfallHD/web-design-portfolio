@@ -291,7 +291,7 @@ function createCompressionChair(materials) {
 }
 
 function createScene(scene, renderer) {
-  scene.background = new THREE.Color('#111218');
+  scene.background = null;
   scene.fog = new THREE.FogExp2('#111218', 0.014);
 
   const rubberMap = makeNoiseTexture({ base: '#18191d', fleck: 'rgba(255,255,255,.08)', density: .18 });
@@ -529,7 +529,8 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
     const host = mount.current;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(58, 1, 0.08, 120);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.35));
     host.appendChild(renderer.domElement);
     const { objects, disposables } = createScene(scene, renderer);
@@ -580,10 +581,27 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
     };
   }, [active, reduced]);
 
+  const p = Math.max(0, Math.min(1, scrollProgress));
+  const photoStyle = {
+    '--walk-x': `${-2 - p * 10}%`,
+    '--walk-y': `${-1 - p * 3.5}%`,
+    '--walk-x-a': `${(-2 - p * 10) * 0.34}%`,
+    '--walk-y-a': `${(-1 - p * 3.5) * 0.2}%`,
+    '--walk-x-b': `${(-2 - p * 10) * -0.26}%`,
+    '--walk-y-b': `${(-1 - p * 3.5) * 0.15}%`,
+    '--walk-scale': 1.04 + p * 0.44,
+    '--walk-scale-a': 1.09 + p * 0.44,
+    '--walk-scale-b': 1.06 + p * 0.44,
+    '--walk-focus': `${20 + p * 70}%`,
+  };
+
   return (
-    <div className="pulse-walkthrough" aria-hidden="true">
+    <div className="pulse-walkthrough" aria-hidden="true" style={photoStyle}>
+      <div className="pulse-walkthrough-photo" />
+      <div className="pulse-walkthrough-depth depth-a" />
+      <div className="pulse-walkthrough-depth depth-b" />
       <div ref={mount} className="pulse-walkthrough-canvas" />
-      {(!ready || reduced) && <div className="pulse-walkthrough-fallback"><span>{reduced ? 'Reduced motion: static facility preview' : 'Loading 3D gym walkthrough'}</span></div>}
+      {(!ready || reduced) && <div className="pulse-walkthrough-fallback"><span>{reduced ? 'Reduced motion: static photoreal facility preview' : 'Loading 3D gym walkthrough'}</span></div>}
     </div>
   );
 }
