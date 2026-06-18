@@ -7,7 +7,7 @@ const BEATS = [
   { name: 'Strength', copy: 'Rack line, dumbbell wall, benches, steel framing, mirrors, plates.' },
   { name: 'Conditioning', copy: 'Rower row, bike silhouettes, ropes, kettlebells, coach lane.' },
   { name: 'Recovery', copy: 'Glass partition, cold plunge, recovery table, compression-chair silhouettes.' },
-  { name: 'Trial Pass', copy: 'Final desk view with a clean handoff into the trial-pass conversion.' },
+  { name: 'Trial Pass', copy: 'Final desk view with a clean handoff into the trial pass.' },
 ];
 
 const CAMERA_POINTS = [
@@ -601,7 +601,7 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
       <div className="pulse-walkthrough-depth depth-a" />
       <div className="pulse-walkthrough-depth depth-b" />
       <div ref={mount} className="pulse-walkthrough-canvas" />
-      {(!ready || reduced) && <div className="pulse-walkthrough-fallback"><span>{reduced ? 'Reduced motion: static photoreal facility preview' : 'Loading 3D gym walkthrough'}</span></div>}
+      {(!ready || reduced) && <div className="pulse-walkthrough-fallback"><span>{reduced ? 'Reduced motion: gym preview' : 'Loading gym tour'}</span></div>}
     </div>
   );
 }
