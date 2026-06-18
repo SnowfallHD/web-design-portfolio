@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ArrowUpRight, Dumbbell, Home, Leaf, ShoppingBag, Newspaper, Utensils, Waves, X } from 'lucide-react';
 
 const sites = [
-  { id: 'pulseforge', title: 'PulseForge', category: 'Performance gym', palette: 'Portfolio piece', accent: '#ff2d55', image: '/brand-images/pulseforge-hyperreal-gym.webp', Icon: Dumbbell, one: 'A high-performance training club website.' },
+  { id: 'pulseforge', title: 'PulseForge', category: 'Performance gym', palette: 'Portfolio piece', accent: '#ff2d55', image: '/brand-images/pulseforge-sequence-01-entrance.webp', Icon: Dumbbell, one: 'A high-performance training club website.' },
   { id: 'atlas', title: 'Atlas Estate', category: 'Luxury real estate', palette: 'Portfolio piece', accent: '#b78342', image: '/brand-images/atlas-estate.webp', Icon: Home, one: 'A private coastal real estate website.' },
   { id: 'verdant', title: 'Verdant Works', category: 'Outdoor living', palette: 'Portfolio piece', accent: '#7ba95b', image: '/brand-images/verdant-works.webp', Icon: Leaf, one: 'A grounded outdoor living website.' },
   { id: 'orbit', title: 'Orbit Supply', category: 'Product drop', palette: 'Portfolio piece', accent: '#73f5ff', image: '/brand-images/orbit-supply.webp', Icon: ShoppingBag, one: 'A product drop website.' },
@@ -15,12 +15,12 @@ const sites = [
 const byId = Object.fromEntries(sites.map((s) => [s.id, s]));
 const PulseForgeWalkthrough = lazy(() => import('./PulseForgeWalkthrough.jsx'));
 const pulseWalkthroughBeats = [
-  ['Entrance', 'Branded reception'],
-  ['Turf', 'Sled lane'],
-  ['Strength', 'Racks + dumbbells'],
-  ['Conditioning', 'Rowers + bikes'],
-  ['Recovery', 'Cold + compression'],
-  ['Trial Pass', 'Final step'],
+  ['Entrance', 'Branded reception', 'Concrete desk, red wall mark, first look into the club.'],
+  ['Turf', 'Sled lane', 'Green turf, hash marks, rubber floor, and racks ahead.'],
+  ['Strength', 'Racks + dumbbells', 'Rack line, benches, mirrors, plates, and steel frames.'],
+  ['Conditioning', 'Rowers + bikes', 'Engine work with rowers, bikes, ropes, and kettlebells.'],
+  ['Recovery', 'Cold + compression', 'Glass recovery room, plunge, table, and compression chairs.'],
+  ['Trial Pass', 'Final step', 'The final desk view resolves into a seven-day trial pass.'],
 ];
 
 function progressFrom(el) {
@@ -332,7 +332,7 @@ function PortfolioApp() {
         <div className="max-w-7xl animate-slide-up">
           <div className="eyebrow mb-6 inline-flex items-center gap-3"><span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Web Design Portfolio</div>
           <div className="flex flex-nowrap items-baseline gap-4 sm:gap-6">
-            <h1 className="whitespace-nowrap text-5xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-7xl lg:text-8xl">Cooper Nusbaum</h1>
+            <h1 className="whitespace-nowrap text-4xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">Cooper Nusbaum</h1>
             <span className="whitespace-nowrap text-xs italic tracking-[0.1em] text-[#ffbd38] sm:text-sm lg:text-base">Bring Your Business to Life</span>
           </div>
         </div>
@@ -403,7 +403,29 @@ function PulseForge({ site, expanded, scrollProgress }) {
   const beatIndex = Math.min(pulseWalkthroughBeats.length - 1, Math.floor(Math.max(0, Math.min(.999, walkProgress)) * pulseWalkthroughBeats.length));
   const activeBeat = pulseWalkthroughBeats[beatIndex];
   return <div className={`site-canvas pulse-site ${expanded ? 'pulse-site-walkthrough' : ''} text-white`}>
-    {expanded && <section className="pulse-walk-stage" aria-label="PulseForge gym tour"><Suspense fallback={<div className="pulse-walkthrough pulse-walkthrough-loading">Loading gym tour</div>}><PulseForgeWalkthrough active={expanded} scrollProgress={walkProgress} /></Suspense><aside className="pulse-walk-ui" aria-label="PulseForge tour progress"><p>Gym tour</p><strong>{activeBeat[0]}</strong><span>{activeBeat[1]}</span><div>{pulseWalkthroughBeats.map(([label], i) => <i key={label} className={i <= beatIndex ? 'active' : ''}>{label}</i>)}</div></aside><div className="pulse-walk-title"><p>South Austin performance club</p><h3>Walk the gym before the trial pass.</h3><span>Reception, turf, racks, conditioning, and recovery in one tour.</span></div></section>}
+    {expanded && (
+      <section className="pulse-walk-stage" aria-label="PulseForge gym tour">
+        <Suspense fallback={<div className="pulse-walkthrough pulse-walkthrough-loading">Loading gym tour</div>}>
+          <PulseForgeWalkthrough active={expanded} scrollProgress={walkProgress} />
+        </Suspense>
+        <aside className="pulse-walk-ui" aria-label="PulseForge tour progress" style={{ '--walk-progress': walkProgress, '--walk-progress-pct': `${walkProgress * 100}%` }}>
+          <p>Scroll-controlled tour</p>
+          <strong>{activeBeat[0]}</strong>
+          <span>{activeBeat[1]}</span>
+          <small>{activeBeat[2]}</small>
+          <div className="pulse-progress-rail"><b /></div>
+          <div className="pulse-walk-steps">
+            {pulseWalkthroughBeats.map(([label], i) => <i key={label} className={i <= beatIndex ? 'active' : ''}>{label}</i>)}
+          </div>
+          <button className={walkProgress > .88 ? 'ready' : ''}>Start 7-day trial</button>
+        </aside>
+        <div className="pulse-walk-title">
+          <p>South Austin performance club</p>
+          <h3>Scroll through the club before the trial pass.</h3>
+          <span>Entrance → turf lane → strength zone → conditioning zone → recovery → trial-pass handoff.</span>
+        </div>
+      </section>
+    )}
     <nav className="pulse-nav"><b>PF/06</b><span>Entrance</span><span>Turf</span><span>Strength</span><span>Conditioning</span><span>Recovery</span><button>Trial pass</button></nav>
     <section className="pulse-hero pulse-walk-hero">{expanded ? <div className="pulse-scene-spacer" /> : <BrandImage site={site} className="pulse-photo" />}<div className="pulse-copy"><p>South Austin performance club</p><h3>Strength. Speed. Return.</h3><div className="pulse-actions"><button>Start 7-day trial</button><button>Tour the gym</button></div></div><div className="pulse-meter"><span>Live class load</span><strong>84%</strong><i /></div></section>
     <section className="pulse-map"><h4>Tour the club: entrance → turf lane → strength → conditioning → recovery.</h4><div>{['Reception desk + branded wall', 'rubber floor + green turf sled track', 'squat racks + dumbbell wall + benches', 'rowers + assault bikes + ropes', 'glass recovery room + cold plunge'].map((x, i) => <span key={x}><b>{String(i+1).padStart(2,'0')}</b>{x}</span>)}</div></section>

@@ -9,7 +9,7 @@ Built for Coop as a personal-projects repo, separate from Kryden.
 - Astro 6
 - React islands
 - Tailwind CSS 4
-- Three.js WebGL scenes
+- Three.js/WebGL where interaction is the point; PulseForge uses a cinematic scroll-scrubbed media sequence for hyperreal gym realism
 - SVG path drawing and custom CSS motion
 - Cloudflare Workers static assets deploy (not Pages)
 
