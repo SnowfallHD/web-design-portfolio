@@ -85,17 +85,33 @@ function ThreeScene({ variant = 'fly', active = false, scrollProgress = 0 }) {
   const mount = useRef(null);
   const mouse = useRef({ x: 0, y: 0 });
   const progress = useRef(scrollProgress);
+  const [renderScene, setRenderScene] = useState(true);
 
   useEffect(() => { progress.current = scrollProgress; }, [scrollProgress]);
 
   useEffect(() => {
-    if (!mount.current) return undefined;
+    if (typeof window === 'undefined') return undefined;
+    const mobileQuery = window.matchMedia('(max-width: 720px)');
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setRenderScene(!reducedMotionQuery.matches && (active || !mobileQuery.matches));
+    update();
+    mobileQuery.addEventListener?.('change', update);
+    reducedMotionQuery.addEventListener?.('change', update);
+    return () => {
+      mobileQuery.removeEventListener?.('change', update);
+      reducedMotionQuery.removeEventListener?.('change', update);
+    };
+  }, [active]);
+
+  useEffect(() => {
+    if (!mount.current || !renderScene) return undefined;
     const host = mount.current;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(variant === 'fly' ? 62 : 48, 1, 0.1, 220);
     camera.position.set(0, 0, variant === 'fly' ? 13 : 6.2);
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.45));
+    const mobileCanvas = window.matchMedia('(max-width: 720px)').matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobileCanvas ? 1 : 1.45));
     host.appendChild(renderer.domElement);
 
     const objects = [];
@@ -297,9 +313,9 @@ function ThreeScene({ variant = 'fly', active = false, scrollProgress = 0 }) {
       });
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
-  }, [variant, active]);
+  }, [variant, active, renderScene]);
 
-  return <div ref={mount} className="three-shell absolute inset-0" aria-hidden="true" />;
+  return <div ref={mount} className="three-shell absolute inset-0" data-scene-disabled={!renderScene || undefined} aria-hidden="true" />;
 }
 
 function PortfolioApp() {
@@ -331,9 +347,9 @@ function PortfolioApp() {
       <header className="relative z-10 mx-auto max-w-7xl border-b border-[#ffe6cb]/10 pb-10 pt-8">
         <div className="max-w-7xl animate-slide-up">
           <div className="eyebrow mb-6 inline-flex items-center gap-3"><span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Web Design Portfolio</div>
-          <div className="flex flex-nowrap items-baseline gap-4 sm:gap-6">
-            <h1 className="whitespace-nowrap text-4xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">Cooper Nusbaum</h1>
-            <span className="whitespace-nowrap text-xs italic tracking-[0.1em] text-[#ffbd38] sm:text-sm lg:text-base">Bring Your Business to Life</span>
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 sm:gap-x-6">
+            <h1 className="whitespace-nowrap text-[clamp(2.05rem,10.5vw,4.5rem)] font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">Cooper Nusbaum</h1>
+            <span className="basis-full whitespace-nowrap text-xs italic tracking-[0.1em] text-[#ffbd38] sm:basis-auto sm:text-sm lg:text-base">Bring Your Business to Life</span>
           </div>
         </div>
       </header>
@@ -344,7 +360,7 @@ function PortfolioApp() {
 
       {activeSite && (
         <div className="site-modal fixed inset-0 z-50 overflow-y-auto bg-black/82 p-2 backdrop-blur-xl sm:p-4" role="dialog" aria-modal="true" aria-label={`${activeSite.title} website preview`} onScroll={(event) => setScrollProgress(progressFrom(event.currentTarget))}>
-          <button data-close-site className="focus-visible-ring fixed right-4 top-4 z-[60] inline-flex items-center gap-2 rounded-lg border border-[#ffe6cb]/15 bg-[#041c1c]/80 px-4 py-3 text-sm font-medium text-[#fff8ec] shadow-2xl backdrop-blur-xl transition hover:border-[#ffbd38]/45 hover:bg-[#092626]" onClick={() => setSelected(null)}><X size={17} /> Close</button>
+          <button data-close-site className="site-close-button focus-visible-ring fixed right-4 top-4 z-[60] inline-flex items-center gap-2 rounded-lg border border-[#ffe6cb]/15 bg-[#041c1c]/80 px-4 py-3 text-sm font-medium text-[#fff8ec] shadow-2xl backdrop-blur-xl transition hover:border-[#ffbd38]/45 hover:bg-[#092626]" onClick={() => setSelected(null)}><X size={17} /> Close</button>
           <div className="expanded-site portal-enter relative min-h-full overflow-visible rounded-xl border border-[#ffe6cb]/12 bg-black shadow-[0_40px_140px_rgba(0,0,0,.75)]">
             <SiteRenderer site={activeSite} expanded scrollProgress={scrollProgress} />
           </div>
@@ -363,12 +379,12 @@ function PreviewCard({ site, index, onOpen }) {
     }
   };
   return (
-    <article data-site-id={site.id} role="button" tabIndex={0} onClick={onOpen} onKeyDown={onKeyDown} className="focus-visible-ring group showroom-card relative grid min-h-[28rem] w-full cursor-pointer overflow-hidden text-left transition duration-500 hover:-translate-y-1 hover:border-[#ffe6cb]/24 hover:bg-[#ffe6cb]/[0.045] lg:grid-cols-[21rem_1fr]" style={{ animationDelay: `${index * 80}ms` }}>
+    <article data-site-id={site.id} role="button" tabIndex={0} onClick={onOpen} onKeyDown={onKeyDown} className="focus-visible-ring group showroom-card relative grid min-h-[24rem] w-full cursor-pointer overflow-hidden text-left transition duration-500 hover:-translate-y-1 hover:border-[#ffe6cb]/24 hover:bg-[#ffe6cb]/[0.045] sm:min-h-[28rem] lg:grid-cols-[21rem_1fr]" style={{ animationDelay: `${index * 80}ms` }}>
       <div className="relative z-10 flex flex-col justify-between border-b border-[#ffe6cb]/10 p-6 lg:border-b-0 lg:border-r">
         <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[#ffe6cb]/12 bg-[#ffe6cb]/[0.035]" style={{ color: site.accent }}><Icon size={22} /></div><p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#ffe6cb]/44">{site.category}</p><h2 className="mt-3 text-2xl font-semibold tracking-[-0.045em] text-[#fff8ec] sm:text-3xl">{site.title}</h2></div>
         <div className="mt-7 flex items-center justify-start text-[0.68rem] uppercase tracking-[0.16em] text-[#ffe6cb]/45"><span className="trace-button inline-flex items-center gap-2 text-[#fff8ec]">Open <ArrowUpRight size={14} /></span></div>
       </div>
-      <div className="preview-mask relative h-[27rem] overflow-hidden lg:h-auto"><div className="absolute inset-x-0 top-0 origin-top scale-[0.62] sm:scale-[0.72] lg:scale-[0.66] xl:scale-[0.74]"><div className="pointer-events-none h-[70rem] w-[142%] -translate-x-[15%] rounded-xl border border-[#ffe6cb]/10 bg-black shadow-2xl"><SiteRenderer site={site} /></div></div><div className="pointer-events-none absolute inset-x-6 bottom-5 z-20 rounded-lg border border-[#ffe6cb]/12 bg-[#041c1c]/70 px-4 py-3 text-center text-[0.68rem] font-medium uppercase tracking-[0.2em] text-[#ffe6cb]/68 backdrop-blur-xl">Portfolio project</div></div>
+      <div className="preview-mask relative h-[21rem] overflow-hidden sm:h-[27rem] lg:h-auto"><div className="absolute inset-x-0 top-0 origin-top scale-[0.52] sm:scale-[0.72] lg:scale-[0.66] xl:scale-[0.74]"><div className="pointer-events-none h-[70rem] w-[142%] -translate-x-[15%] rounded-xl border border-[#ffe6cb]/10 bg-black shadow-2xl"><SiteRenderer site={site} /></div></div><div className="pointer-events-none absolute inset-x-4 bottom-4 z-20 rounded-lg border border-[#ffe6cb]/12 bg-[#041c1c]/70 px-4 py-3 text-center text-[0.68rem] font-medium uppercase tracking-[0.2em] text-[#ffe6cb]/68 backdrop-blur-xl sm:inset-x-6 sm:bottom-5">Portfolio project</div></div>
     </article>
   );
 }

@@ -548,6 +548,233 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .luma-hero .brand-photo { height: 24rem; }
 }
 
+
+/* Touch/mobile optimization pass for the portfolio shell and every inner demo site. */
+.site-canvas,
+.site-canvas *,
+.showroom-card,
+.showroom-card * { min-width: 0; }
+.site-close-button {
+  min-height: 44px;
+  touch-action: manipulation;
+  top: max(1rem, env(safe-area-inset-top));
+}
+.site-modal { padding-bottom: max(.5rem, env(safe-area-inset-bottom)); }
+.site-canvas button { min-height: 44px; touch-action: manipulation; }
+
+@media (max-width: 1100px) {
+  .site-modal .expanded-site { max-width: min(100%, 62rem); }
+  .pulse-zones,
+  .pulse-programs,
+  .pulse-pricing,
+  .atlas-listings,
+  .atlas-listings-wide,
+  .atlas-process,
+  .verdant-packages,
+  .verdant-timeline,
+  .orbit-specs,
+  .orbit-catalog,
+  .ember-courses,
+  .ember-menu,
+  .luma-finder,
+  .luma-treatments,
+  .luma-practitioners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pulse-zones > h4,
+  .pulse-programs > h4,
+  .pulse-pricing > h4,
+  .atlas-process > h4,
+  .verdant-packages > h4,
+  .verdant-timeline > h4,
+  .orbit-specs > h4,
+  .orbit-catalog > h4,
+  .ember-courses > h4,
+  .ember-menu > h4,
+  .luma-finder > h4,
+  .luma-practitioners > h4 {
+    grid-column: 1 / -1;
+  }
+  .atlas-hero { grid-template-columns: 1fr 1fr; }
+  .atlas-hero aside { grid-column: 1 / -1; border-left: 0; border-top: 1px solid rgba(25,23,20,.18); padding: 1rem 0 0; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .8rem 1rem; }
+  .orbit-cart { grid-template-columns: .9fr 1fr; }
+}
+
+@media (max-width: 760px) {
+  html, body { width: 100%; overflow-x: hidden; }
+  .showroom-shell { padding-inline: .85rem !important; padding-top: .8rem !important; }
+  .showroom-shell header { padding-top: 1.15rem; padding-bottom: 2rem; }
+  .eyebrow { max-width: 100%; padding: .56rem .68rem; font-size: .64rem; letter-spacing: .13em; }
+  .showroom-card { border-radius: 12px; box-shadow: 0 18px 54px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,230,203,.06); }
+  .showroom-card > div:first-child { padding: 1.05rem; }
+  .showroom-card .preview-mask { height: min(22rem, 68svh) !important; }
+  .preview-mask > div:first-child { transform: scale(.66) !important; transform-origin: top center; }
+  .preview-mask > div:first-child > div { width: 138% !important; transform: translateX(-13%) !important; }
+
+  .site-modal { padding: max(4.5rem, calc(env(safe-area-inset-top) + 3.7rem)) .45rem max(.75rem, env(safe-area-inset-bottom)); scrollbar-gutter: auto; }
+  .site-close-button { left: .65rem; right: .65rem; justify-content: center; top: max(.55rem, env(safe-area-inset-top)); padding-block: .78rem; }
+  .expanded-site { border-radius: 14px !important; overflow: hidden !important; }
+  .expanded-site .site-canvas { min-height: 100svh; }
+  .expanded-site .site-canvas section,
+  .expanded-site .site-canvas header { padding-left: 1rem; padding-right: 1rem; }
+  .expanded-site .site-canvas h3,
+  .expanded-site .site-canvas h4 { overflow-wrap: anywhere; }
+  .expanded-site .site-canvas button { width: 100%; justify-content: center; text-align: center; }
+  .brand-photo img { transform: scale(1.01); }
+
+  .pulse-walk-stage { height: 500vh; min-height: 222rem; }
+  .pulse-walkthrough { height: 100svh; min-height: 38rem; }
+  .pulse-walkthrough-frame { inset: -2%; }
+  .pulse-walkthrough-frame img { object-position: var(--frame-focus); filter: saturate(1.02) contrast(1.04) brightness(.78); }
+  .pulse-walkthrough::after { background: linear-gradient(0deg, rgba(0,0,0,.76), transparent 36%, rgba(0,0,0,.18)), linear-gradient(90deg, rgba(0,0,0,.44), transparent 62%); }
+  .pulse-walk-title { top: 16svh; left: 1rem; width: calc(100% - 2rem); }
+  .pulse-walk-title p { font-size: .66rem; letter-spacing: .14em; }
+  .pulse-walk-title h3 { max-width: 20rem; font-size: clamp(2.65rem, 13vw, 4.8rem); line-height: .82; }
+  .pulse-walk-title span { display: none; }
+  .pulse-walk-ui { float: none; position: sticky; top: auto; bottom: max(.75rem, env(safe-area-inset-bottom)); width: calc(100% - 1.2rem); max-height: 42svh; margin: -45svh .6rem 0; overflow: auto; overscroll-behavior: contain; padding: .85rem; border-radius: 1rem; background: rgba(0,0,0,.68); }
+  .pulse-walk-ui strong { font-size: clamp(1.65rem, 8vw, 2.2rem); }
+  .pulse-walk-ui small { line-height: 1.35; }
+  .pulse-walk-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .3rem; }
+  .pulse-walk-ui i { padding: .45rem .4rem; font-size: .58rem; letter-spacing: .06em; border-left-width: 0; border-top: 2px solid rgba(255,255,255,.16); }
+  .pulse-walk-ui i.active { border-top-color: #ff2d55; border-left-color: transparent; }
+  .pulse-walkthrough-trial { display: none; }
+  .pulse-site-walkthrough .pulse-walk-hero { min-height: 24rem; padding-top: 2rem; }
+  .pulse-nav,
+  .atlas-nav,
+  .orbit-site nav,
+  .ember-hero nav { gap: .65rem; padding: 1rem; flex-wrap: wrap; }
+  .pulse-nav button,
+  .orbit-site nav button,
+  .ember-hero nav button { margin-left: 0; width: auto; min-width: 8.5rem; }
+  .pulse-hero,
+  .pulse-map,
+  .pulse-rhythm,
+  .pulse-rhythm > div:last-child,
+  .pulse-programs,
+  .pulse-zones,
+  .pulse-pricing,
+  .pulse-coaches,
+  .atlas-hero,
+  .atlas-route,
+  .atlas-process,
+  .atlas-listings,
+  .atlas-listings-wide,
+  .atlas-intake,
+  .verdant-site header,
+  .verdant-plan,
+  .verdant-wipe,
+  .verdant-packages,
+  .verdant-services,
+  .verdant-timeline,
+  .orbit-hero,
+  .orbit-detail,
+  .orbit-specs,
+  .orbit-catalog,
+  .orbit-cart,
+  .margin-mast,
+  .margin-lede,
+  .margin-archive,
+  .margin-archive > div,
+  .margin-layout,
+  .ember-courses,
+  .ember-menu,
+  .ember-room,
+  .ember-reserve,
+  .luma-hero,
+  .luma-finder,
+  .luma-treatments,
+  .luma-practitioners { grid-template-columns: 1fr !important; }
+
+  .pulse-hero,
+  .atlas-hero,
+  .verdant-site header,
+  .orbit-hero,
+  .luma-hero { min-height: auto; gap: 1.4rem; padding-top: 2rem; padding-bottom: 3rem; align-items: start; }
+  .pulse-copy h3 { font-size: clamp(3.1rem, 17vw, 5rem); line-height: .78; }
+  .pulse-actions { display: grid; grid-template-columns: 1fr; }
+  .pulse-meter { position: relative; inset: auto; right: auto; top: auto; width: 100%; margin-top: 1.4rem; }
+  .pulse-map span { grid-template-columns: 2.2rem 1fr; padding: .8rem; letter-spacing: .06em; }
+  .pulse-zones,
+  .pulse-coaches,
+  .pulse-pricing,
+  .pulse-rhythm,
+  .pulse-programs,
+  .pulse-map { padding-top: 3rem; padding-bottom: 3rem; }
+  .pulse-zones article,
+  .pulse-pricing article { min-height: 12rem; }
+  .pulse-zones h5,
+  .pulse-pricing h5 { margin-top: 2rem; }
+
+  .atlas-nav { align-items: flex-start; }
+  .atlas-photo,
+  .verdant-site header .brand-photo,
+  .orbit-object,
+  .orbit-detail .brand-photo,
+  .margin-cover,
+  .margin-layout .brand-photo,
+  .ember-room .brand-photo,
+  .luma-hero .brand-photo,
+  .pulse-photo { height: min(25rem, 64svh); }
+  .atlas-route svg,
+  .verdant-plan svg { height: 14rem; }
+  .atlas-hero aside { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 1rem; }
+  .atlas-listings .brand-photo { height: 16rem; }
+  .atlas-listings h5 { font-size: clamp(1.7rem, 9vw, 2.4rem); }
+  .atlas-intake div { gap: .35rem; }
+
+  .verdant-wipe article { min-height: 18rem; }
+  .verdant-wipe .brand-photo { height: 18rem; }
+  .verdant-services span { display: flex; margin: .3rem 0; justify-content: center; }
+  .verdant-timeline span { min-height: 5rem; }
+
+  .orbit-site nav { align-items: center; }
+  .orbit-hero h3 { font-size: clamp(3.4rem, 18vw, 5.6rem); line-height: .82; }
+  .orbit-object { min-height: min(25rem, 64svh); }
+  .orbit-detail button { min-width: 0; padding-top: 3rem; }
+  .orbit-detail div div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .orbit-variants { padding-inline: 1rem; scroll-snap-type: x mandatory; }
+  .orbit-variants button { min-width: 72vw; scroll-snap-align: start; }
+  .orbit-cart { margin: 1rem; padding: 1rem; }
+
+  .margin-mast { gap: 1rem; padding-top: 2.5rem; }
+  .margin-mast h3 { font-size: clamp(4.2rem, 23vw, 7rem); letter-spacing: -.08em; }
+  .margin-cover { transform: rotate(.6deg); }
+  .margin-lede article,
+  .margin-archive aside,
+  .margin-archive article,
+  .margin-editor { padding: 1.35rem; min-height: auto; }
+  .margin-rail { padding: 1rem; align-items: flex-start; }
+  .margin-rail h4 { min-width: 9rem; }
+  .margin-layout { gap: 1.4rem; padding-top: 3rem; padding-bottom: 4rem; }
+
+  .ember-hero { min-height: 36rem; }
+  .ember-hero div:last-child { left: 1rem; right: 1rem; bottom: 2rem; max-width: none; }
+  .ember-hero h3 { font-size: clamp(3.2rem, 15vw, 5.2rem); }
+  .ember-reserve { margin: 1rem 1rem 4rem; padding: 1rem; }
+
+  .luma-breathe,
+  .luma-book,
+  .luma-finder,
+  .luma-treatments,
+  .luma-practitioners { padding-top: 3rem; padding-bottom: 3rem; }
+  .luma-breathe span { display: flex; justify-content: center; margin: .35rem 0; }
+  .breath-orb { width: 7.5rem; height: 7.5rem; }
+  .luma-treatments .brand-photo { height: 17rem; }
+}
+
+@media (max-width: 430px) {
+  .showroom-shell { padding-inline: .65rem !important; }
+  .showroom-card .preview-mask { height: 20rem !important; }
+  .preview-mask > div:first-child { transform: scale(.64) !important; }
+  .site-modal { padding-left: .35rem; padding-right: .35rem; }
+  .expanded-site .site-canvas section,
+  .expanded-site .site-canvas header { padding-left: .85rem; padding-right: .85rem; }
+  .pulse-walk-ui { max-height: 45svh; width: calc(100% - .8rem); margin-left: .4rem; margin-right: .4rem; }
+  .pulse-walk-title h3 { font-size: clamp(2.4rem, 14vw, 4.1rem); }
+  .atlas-hero aside { grid-template-columns: 1fr; }
+  .orbit-detail div div { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
