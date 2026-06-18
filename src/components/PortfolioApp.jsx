@@ -330,8 +330,9 @@ function PortfolioApp() {
     <main className="showroom-shell relative min-h-screen overflow-hidden px-4 py-5 text-[#ffe6cb] sm:px-6 lg:px-10">
       <header className="relative z-10 mx-auto max-w-7xl border-b border-[#ffe6cb]/10 pb-10 pt-8">
         <div className="max-w-4xl animate-slide-up">
-          <div className="eyebrow mb-6 inline-flex items-center gap-3"><span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Portfolio</div>
-          <h1 className="max-w-5xl text-4xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">Cooper Nusbaum Web Design Portfolio</h1>
+          <div className="eyebrow mb-6 inline-flex items-center gap-3"><span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Web Design Portfolio</div>
+          <h1 className="max-w-5xl whitespace-nowrap text-5xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-7xl lg:text-8xl">Cooper Nusbaum</h1>
+          <p className="mt-5 inline-flex rounded-full border border-[#ffbd38]/25 bg-[#ffbd38]/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#ffbd38] sm:text-sm">Bring Your Business to Life</p>
         </div>
       </header>
 
