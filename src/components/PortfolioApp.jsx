@@ -328,17 +328,10 @@ function PortfolioApp() {
 
   return (
     <main className="showroom-shell relative min-h-screen overflow-hidden px-4 py-5 text-[#ffe6cb] sm:px-6 lg:px-10">
-      <header className="relative z-10 mx-auto grid max-w-7xl gap-8 border-b border-[#ffe6cb]/10 pb-10 pt-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-end">
+      <header className="relative z-10 mx-auto max-w-7xl border-b border-[#ffe6cb]/10 pb-10 pt-8">
         <div className="max-w-4xl animate-slide-up">
-          <div className="eyebrow mb-6 inline-flex items-center gap-3"><span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Interactive website portfolio</div>
-          <h1 className="max-w-5xl text-4xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">Seven brand worlds, not seven template skins.</h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-[#ffe6cb]/68 sm:text-lg">A vertical showroom of clicked-in website demos: cinematic imagery, distinct typography, real business sections, SVG drawing, scroll motion, and WebGL where it earns its place.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><span className="trace-chip">Brand-specific</span><span className="trace-chip">Image-rich</span><span className="trace-chip">Scroll / SVG / WebGL</span></div>
-        </div>
-        <div className="system-card relative z-10 p-5 text-sm text-[#ffe6cb]/72">
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-[#fff8ec]">Portfolio thesis</p>
-          <p className="mt-3 leading-6">The shell stays cohesive. The inner sites prove range: different visitor, different conversion logic, different visual system, different motion idea.</p>
-          <div className="mt-5 grid grid-cols-2 gap-2 text-[0.68rem] uppercase tracking-[0.18em] text-[#ffe6cb]/45"><span>Astro</span><span>React</span><span>Tailwind</span><span>Three.js</span></div>
+          <div className="eyebrow mb-6 inline-flex items-center gap-3"><span className="h-1.5 w-1.5 rounded-full bg-[#ffbd38]" /> Portfolio</div>
+          <h1 className="max-w-5xl text-4xl font-semibold leading-[0.94] tracking-[-0.055em] text-[#fff8ec] sm:text-6xl lg:text-7xl">Cooper Nusbaum Web Design Portfolio</h1>
         </div>
       </header>
 
@@ -347,8 +340,8 @@ function PortfolioApp() {
       </section>
 
       {activeSite && (
-        <div className="site-modal fixed inset-0 z-50 overflow-y-auto bg-black/82 p-2 backdrop-blur-xl sm:p-4" role="dialog" aria-modal="true" aria-label={`${activeSite.title} expanded preview`} onScroll={(event) => setScrollProgress(progressFrom(event.currentTarget))}>
-          <button data-close-site className="focus-visible-ring fixed right-4 top-4 z-[60] inline-flex items-center gap-2 rounded-lg border border-[#ffe6cb]/15 bg-[#041c1c]/80 px-4 py-3 text-sm font-medium text-[#fff8ec] shadow-2xl backdrop-blur-xl transition hover:border-[#ffbd38]/45 hover:bg-[#092626]" onClick={() => setSelected(null)}><X size={17} /> Exit site</button>
+        <div className="site-modal fixed inset-0 z-50 overflow-y-auto bg-black/82 p-2 backdrop-blur-xl sm:p-4" role="dialog" aria-modal="true" aria-label={`${activeSite.title} website preview`} onScroll={(event) => setScrollProgress(progressFrom(event.currentTarget))}>
+          <button data-close-site className="focus-visible-ring fixed right-4 top-4 z-[60] inline-flex items-center gap-2 rounded-lg border border-[#ffe6cb]/15 bg-[#041c1c]/80 px-4 py-3 text-sm font-medium text-[#fff8ec] shadow-2xl backdrop-blur-xl transition hover:border-[#ffbd38]/45 hover:bg-[#092626]" onClick={() => setSelected(null)}><X size={17} /> Close</button>
           <div className="expanded-site portal-enter relative min-h-full overflow-visible rounded-xl border border-[#ffe6cb]/12 bg-black shadow-[0_40px_140px_rgba(0,0,0,.75)]">
             <SiteRenderer site={activeSite} expanded scrollProgress={scrollProgress} />
           </div>
@@ -369,10 +362,10 @@ function PreviewCard({ site, index, onOpen }) {
   return (
     <article data-site-id={site.id} role="button" tabIndex={0} onClick={onOpen} onKeyDown={onKeyDown} className="focus-visible-ring group showroom-card relative grid min-h-[28rem] w-full cursor-pointer overflow-hidden text-left transition duration-500 hover:-translate-y-1 hover:border-[#ffe6cb]/24 hover:bg-[#ffe6cb]/[0.045] lg:grid-cols-[21rem_1fr]" style={{ animationDelay: `${index * 80}ms` }}>
       <div className="relative z-10 flex flex-col justify-between border-b border-[#ffe6cb]/10 p-6 lg:border-b-0 lg:border-r">
-        <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[#ffe6cb]/12 bg-[#ffe6cb]/[0.035]" style={{ color: site.accent }}><Icon size={22} /></div><p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#ffe6cb]/44">{site.category}</p><h2 className="mt-3 text-2xl font-semibold tracking-[-0.045em] text-[#fff8ec] sm:text-3xl">{site.title}</h2><p className="mt-4 max-w-xs text-sm leading-6 text-[#ffe6cb]/58">{site.one}</p></div>
-        <div className="mt-7 flex items-center justify-between gap-4 text-[0.68rem] uppercase tracking-[0.16em] text-[#ffe6cb]/45"><span>{site.palette}</span><span className="trace-button inline-flex items-center gap-2 text-[#fff8ec]">Enter <ArrowUpRight size={14} /></span></div>
+        <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[#ffe6cb]/12 bg-[#ffe6cb]/[0.035]" style={{ color: site.accent }}><Icon size={22} /></div><p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[#ffe6cb]/44">{site.category}</p><h2 className="mt-3 text-2xl font-semibold tracking-[-0.045em] text-[#fff8ec] sm:text-3xl">{site.title}</h2></div>
+        <div className="mt-7 flex items-center justify-start text-[0.68rem] uppercase tracking-[0.16em] text-[#ffe6cb]/45"><span className="trace-button inline-flex items-center gap-2 text-[#fff8ec]">Open <ArrowUpRight size={14} /></span></div>
       </div>
-      <div className="preview-mask relative h-[27rem] overflow-hidden lg:h-auto"><div className="absolute inset-x-0 top-0 origin-top scale-[0.62] sm:scale-[0.72] lg:scale-[0.66] xl:scale-[0.74]"><div className="pointer-events-none h-[70rem] w-[142%] -translate-x-[15%] rounded-xl border border-[#ffe6cb]/10 bg-black shadow-2xl"><SiteRenderer site={site} /></div></div><div className="pointer-events-none absolute inset-x-6 bottom-5 z-20 rounded-lg border border-[#ffe6cb]/12 bg-[#041c1c]/70 px-4 py-3 text-center text-[0.68rem] font-medium uppercase tracking-[0.2em] text-[#ffe6cb]/68 backdrop-blur-xl">standalone brand demo — opens inline</div></div>
+      <div className="preview-mask relative h-[27rem] overflow-hidden lg:h-auto"><div className="absolute inset-x-0 top-0 origin-top scale-[0.62] sm:scale-[0.72] lg:scale-[0.66] xl:scale-[0.74]"><div className="pointer-events-none h-[70rem] w-[142%] -translate-x-[15%] rounded-xl border border-[#ffe6cb]/10 bg-black shadow-2xl"><SiteRenderer site={site} /></div></div><div className="pointer-events-none absolute inset-x-6 bottom-5 z-20 rounded-lg border border-[#ffe6cb]/12 bg-[#041c1c]/70 px-4 py-3 text-center text-[0.68rem] font-medium uppercase tracking-[0.2em] text-[#ffe6cb]/68 backdrop-blur-xl">Website demo</div></div>
     </article>
   );
 }
