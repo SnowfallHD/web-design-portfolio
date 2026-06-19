@@ -10,4 +10,9 @@
   - Prompt intent: same premium PulseForge performance club, same palette/lens/lighting/materials/signage, moving entrance → turf lane → strength zone → conditioning zone → recovery area → trial-pass desk.
   - Use: PulseForge scroll-scrubbed cinematic media layer. Browser code controls crossfade, zoom/pan, progress rail, labels, CTA reveal, reduced-motion, and mobile fallbacks; primitive Three.js geometry is not the realism layer.
 
+- `orbit-product-*.webp`
+  - Source: generated specifically for this portfolio on 2026-06-18.
+  - Prompt intent: consistent premium technical ecommerce product photography for Orbit Supply catalog cards, dark graphite background, cyan rim light, no text/logos.
+  - Use: product images for the expanded Orbit Supply ecommerce catalog.
+
 Existing `*-*.webp` brand images are project-bundled generated/demo imagery for portfolio examples.

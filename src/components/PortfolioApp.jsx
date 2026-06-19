@@ -25,6 +25,12 @@ const pulseWalkthroughBeats = [
 
 function progressFrom(el) {
   if (!el) return 0;
+  const stage = el.querySelector?.('.pulse-walk-stage');
+  if (stage) {
+    const start = stage.offsetTop;
+    const span = Math.max(1, stage.offsetHeight - el.clientHeight);
+    return Math.min(1, Math.max(0, (el.scrollTop - start) / span));
+  }
   const max = Math.max(1, el.scrollHeight - el.clientHeight);
   return Math.min(1, Math.max(0, el.scrollTop / max));
 }
@@ -361,7 +367,7 @@ function PortfolioApp() {
       {activeSite && (
         <div className="site-modal fixed inset-0 z-50 overflow-y-auto bg-black/82 p-2 backdrop-blur-xl sm:p-4" role="dialog" aria-modal="true" aria-label={`${activeSite.title} website preview`} onScroll={(event) => setScrollProgress(progressFrom(event.currentTarget))}>
           <button data-close-site className="site-close-button focus-visible-ring fixed right-4 top-4 z-[60] inline-flex items-center gap-2 rounded-lg border border-[#ffe6cb]/15 bg-[#041c1c]/80 px-4 py-3 text-sm font-medium text-[#fff8ec] shadow-2xl backdrop-blur-xl transition hover:border-[#ffbd38]/45 hover:bg-[#092626]" onClick={() => setSelected(null)}><X size={17} /> Close</button>
-          <div className="expanded-site portal-enter relative min-h-full overflow-visible rounded-xl border border-[#ffe6cb]/12 bg-black shadow-[0_40px_140px_rgba(0,0,0,.75)]">
+          <div className={`expanded-site expanded-site-${activeSite.id} portal-enter relative min-h-full overflow-visible rounded-xl border border-[#ffe6cb]/12 bg-black shadow-[0_40px_140px_rgba(0,0,0,.75)]`}>
             <SiteRenderer site={activeSite} expanded scrollProgress={scrollProgress} />
           </div>
         </div>
@@ -424,21 +430,23 @@ function PulseForge({ site, expanded, scrollProgress }) {
         <Suspense fallback={<div className="pulse-walkthrough pulse-walkthrough-loading">Loading gym tour</div>}>
           <PulseForgeWalkthrough active={expanded} scrollProgress={walkProgress} />
         </Suspense>
-        <aside className="pulse-walk-ui" aria-label="PulseForge tour progress" style={{ '--walk-progress': walkProgress, '--walk-progress-pct': `${walkProgress * 100}%` }}>
-          <p>Scroll-controlled tour</p>
-          <strong>{activeBeat[0]}</strong>
-          <span>{activeBeat[1]}</span>
-          <small>{activeBeat[2]}</small>
-          <div className="pulse-progress-rail"><b /></div>
-          <div className="pulse-walk-steps">
-            {pulseWalkthroughBeats.map(([label], i) => <i key={label} className={i <= beatIndex ? 'active' : ''}>{label}</i>)}
+        <div className="pulse-walk-overlay" style={{ '--walk-progress': walkProgress, '--walk-progress-pct': `${walkProgress * 100}%` }}>
+          <div className="pulse-walk-title">
+            <p>South Austin performance club</p>
+            <h3>Scroll through the club before the trial pass.</h3>
+            <span>Entrance → turf lane → strength zone → conditioning zone → recovery → trial-pass handoff.</span>
           </div>
-          <button className={walkProgress > .88 ? 'ready' : ''}>Start 7-day trial</button>
-        </aside>
-        <div className="pulse-walk-title">
-          <p>South Austin performance club</p>
-          <h3>Scroll through the club before the trial pass.</h3>
-          <span>Entrance → turf lane → strength zone → conditioning zone → recovery → trial-pass handoff.</span>
+          <aside className="pulse-walk-ui" aria-label="PulseForge tour progress">
+            <p>Scroll-controlled tour</p>
+            <strong>{activeBeat[0]}</strong>
+            <span>{activeBeat[1]}</span>
+            <small>{activeBeat[2]}</small>
+            <div className="pulse-progress-rail"><b /></div>
+            <div className="pulse-walk-steps">
+              {pulseWalkthroughBeats.map(([label], i) => <i key={label} className={i <= beatIndex ? 'active' : ''}>{label}</i>)}
+            </div>
+            <button className={walkProgress > .88 ? 'ready' : ''}>Start 7-day trial</button>
+          </aside>
         </div>
       </section>
     )}
@@ -475,16 +483,16 @@ function VerdantWorks({ site, scrollProgress }) {
 
 function OrbitSupply({ site, expanded, scrollProgress }) {
   const products = [
-    ['OS-AERO-42', 'AeroShell Pack', '$248', '42L · carbon frame', 'commute / field'],
-    ['OS-GRID-08', 'Grid Pouch', '$48', 'magnetic grid · 180g', 'daily carry'],
-    ['OS-RAIN-01', 'Rain Skin', '$36', 'ripstop shell · taped seam', 'storm cover'],
-    ['OS-CLIP-04', 'Rail Clips', '$18', 'anodized set of 4', 'strap mods'],
-    ['OS-SLEEVE-16', 'Thermal Sleeve', '$64', '16in · insulated felt', 'laptop'],
-    ['OS-BOTTLE-24', 'Vac Bottle', '$42', '24oz · matte steel', 'hydration'],
-    ['OS-CUBE-12', 'Pack Cube', '$32', '12L · mesh wall', 'clothes'],
-    ['OS-LIGHT-02', 'Signal Light', '$58', 'USB-C · amber/red', 'night ride'],
+    ['OS-AERO-42', 'AeroShell Pack', '$248', '42L · carbon frame', 'commute / field', '/brand-images/orbit-product-aeroshell-pack.webp'],
+    ['OS-GRID-08', 'Grid Pouch', '$48', 'magnetic grid · 180g', 'daily carry', '/brand-images/orbit-product-grid-pouch.webp'],
+    ['OS-RAIN-01', 'Rain Skin', '$36', 'ripstop shell · taped seam', 'storm cover', '/brand-images/orbit-product-rain-skin.webp'],
+    ['OS-CLIP-04', 'Rail Clips', '$18', 'anodized set of 4', 'strap mods', '/brand-images/orbit-product-rail-clips.webp'],
+    ['OS-SLEEVE-16', 'Thermal Sleeve', '$64', '16in · insulated felt', 'laptop', '/brand-images/orbit-product-thermal-sleeve.webp'],
+    ['OS-BOTTLE-24', 'Vac Bottle', '$42', '24oz · matte steel', 'hydration', '/brand-images/orbit-product-vac-bottle.webp'],
+    ['OS-CUBE-12', 'Pack Cube', '$32', '12L · mesh wall', 'clothes', '/brand-images/orbit-product-pack-cube.webp'],
+    ['OS-LIGHT-02', 'Signal Light', '$58', 'USB-C · amber/red', 'night ride', '/brand-images/orbit-product-signal-light.webp'],
   ];
-  return <div className="site-canvas orbit-site text-white"><nav><span>ORBIT SUPPLY / DROP 04</span><button>Cart — 3 items · $332</button></nav><section className="orbit-hero"><div><p>Adaptive carry system</p><h3>AeroShell Pack</h3><p>Weather shell, carbon frame, removable grid pouch, and strap hardware built for commuters who pack like field operators.</p><button>Reserve the drop</button></div><div className="orbit-object"><BrandImage site={site} shade={false} /><ThreeScene variant="morph" active={expanded} scrollProgress={scrollProgress} /></div></section><section className="orbit-detail"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply kit packaging and components" shade={false} /><div><span>Hero item / OS-AERO-42</span><h4>AeroShell Pack detail.</h4><p>Carbon U-frame, roll-top rain shell, magnetic front grid, 16-inch thermal sleeve, removable compression straps, and repairable buckle hardware.</p><div>{['Graphite', 'Ion blue', 'Field clay', 'Night violet'].map((v, i) => <button key={v} style={{ '--swatch': ['#24262d','#73f5ff','#9b7b5a','#7d5cff'][i] }}>{v}</button>)}</div></div></section><section className="orbit-specs"><h4>Material states change with the day.</h4>{['Rain shell beads water', 'Carbon frame keeps load shape', 'Grid pouch snaps off', 'Thermal sleeve protects battery'].map((s) => <article key={s}><h5>{s}</h5><p>Product details stay clear from every angle.</p></article>)}</section><section className="orbit-filters"><span>All gear</span><span>Packs</span><span>Modular pouches</span><span>Weather</span><span>Accessories</span></section><section className="orbit-catalog">{products.map(([sku, name, price, spec, use]) => <article key={sku}><small>{sku}</small><h5>{name}</h5><strong>{price}</strong><p>{spec}</p><em>{use}</em></article>)}</section><section className="orbit-cart"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply packaging and components" shade={false} /><h4>Complete the kit.</h4><div>{['AeroShell Pack — $248', 'Grid pouch — $48', 'Rain skin — $36'].map((i) => <span key={i}>{i}</span>)}<strong>Total — $332</strong></div><button>Checkout</button></section></div>;
+  return <div className="site-canvas orbit-site text-white"><nav><span>ORBIT SUPPLY / DROP 04</span><button>Cart — 3 items · $332</button></nav><section className="orbit-hero"><div><p>Adaptive carry system</p><h3>AeroShell Pack</h3><p>Weather shell, carbon frame, removable grid pouch, and strap hardware built for commuters who pack like field operators.</p><button>Reserve the drop</button></div><div className="orbit-object"><BrandImage site={site} shade={false} /><ThreeScene variant="morph" active={expanded} scrollProgress={scrollProgress} /></div></section><section className="orbit-detail"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply kit packaging and components" shade={false} /><div><span>Hero item / OS-AERO-42</span><h4>AeroShell Pack detail.</h4><p>Carbon U-frame, roll-top rain shell, magnetic front grid, 16-inch thermal sleeve, removable compression straps, and repairable buckle hardware.</p><div>{['Graphite', 'Ion blue', 'Field clay', 'Night violet'].map((v, i) => <button key={v} style={{ '--swatch': ['#24262d','#73f5ff','#9b7b5a','#7d5cff'][i] }}>{v}</button>)}</div></div></section><section className="orbit-specs"><h4>Material states change with the day.</h4>{['Rain shell beads water', 'Carbon frame keeps load shape', 'Grid pouch snaps off', 'Thermal sleeve protects battery'].map((s) => <article key={s}><h5>{s}</h5><p>Product details stay clear from every angle.</p></article>)}</section><section className="orbit-filters"><span>All gear</span><span>Packs</span><span>Modular pouches</span><span>Weather</span><span>Accessories</span></section><section className="orbit-catalog">{products.map(([sku, name, price, spec, use, image]) => <article key={sku}><Photo src={image} alt={`${name} product photography`} className="orbit-product-photo" shade={false} /><small>{sku}</small><h5>{name}</h5><strong>{price}</strong><p>{spec}</p><em>{use}</em></article>)}</section><section className="orbit-cart"><Photo src="/brand-images/orbit-packaging.webp" alt="Orbit Supply packaging and components" shade={false} /><h4>Complete the kit.</h4><div>{['AeroShell Pack — $248', 'Grid pouch — $48', 'Rain skin — $36'].map((i) => <span key={i}>{i}</span>)}<strong>Total — $332</strong></div><button>Checkout</button></section></div>;
 }
 
 function TheMargin({ site }) {

@@ -122,8 +122,9 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
     return () => { cancelled = true; };
   }, []);
 
-  const currentOpacity = reduced ? 1 : 1 - blend;
-  const nextOpacity = reduced ? 0 : blend;
+  const hasNext = nextIndex !== index;
+  const currentOpacity = reduced || !hasNext ? 1 : 1 - blend;
+  const nextOpacity = reduced || !hasNext ? 0 : blend;
 
   return (
     <div
