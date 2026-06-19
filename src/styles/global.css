@@ -618,8 +618,17 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .expanded-site .site-canvas section,
   .expanded-site .site-canvas header { padding-left: 1rem; padding-right: 1rem; }
   .expanded-site .site-canvas h3,
-  .expanded-site .site-canvas h4 { overflow-wrap: anywhere; }
-  .expanded-site .site-canvas button { width: 100%; justify-content: center; text-align: center; }
+  .expanded-site .site-canvas h4 {
+    text-wrap: balance;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+  .expanded-site .site-canvas p { line-height: 1.72; }
+  .expanded-site .site-canvas button { width: 100%; justify-content: center; text-align: center; letter-spacing: .055em; }
+  .expanded-site .site-canvas p + button,
+  .expanded-site .site-canvas h3 + button,
+  .expanded-site .site-canvas h4 + button { margin-top: 1.15rem; }
   .brand-photo img { transform: scale(1.01); }
 
   .pulse-walk-stage { height: 500vh; min-height: 222rem; }
@@ -627,25 +636,32 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .pulse-walkthrough-frame { inset: -2%; }
   .pulse-walkthrough-frame img { object-position: var(--frame-focus); filter: saturate(1.02) contrast(1.04) brightness(.78); }
   .pulse-walkthrough::after { background: linear-gradient(0deg, rgba(0,0,0,.76), transparent 36%, rgba(0,0,0,.18)), linear-gradient(90deg, rgba(0,0,0,.44), transparent 62%); }
-  .pulse-walk-title { top: 16svh; left: 1rem; width: calc(100% - 2rem); }
-  .pulse-walk-title p { font-size: .66rem; letter-spacing: .14em; }
-  .pulse-walk-title h3 { max-width: 20rem; font-size: clamp(2.65rem, 13vw, 4.8rem); line-height: .82; }
+  .pulse-walk-title { top: 12svh; left: 1rem; width: calc(100% - 2rem); }
+  .pulse-walk-title p { font-size: .64rem; letter-spacing: .16em; }
+  .pulse-walk-title h3 { max-width: 18rem; font-size: clamp(2.1rem, 10vw, 3.5rem); line-height: .9; letter-spacing: -.045em; }
   .pulse-walk-title span { display: none; }
-  .pulse-walk-ui { float: none; position: sticky; top: auto; bottom: max(.75rem, env(safe-area-inset-bottom)); width: calc(100% - 1.2rem); max-height: 42svh; margin: -45svh .6rem 0; overflow: auto; overscroll-behavior: contain; padding: .85rem; border-radius: 1rem; background: rgba(0,0,0,.68); }
-  .pulse-walk-ui strong { font-size: clamp(1.65rem, 8vw, 2.2rem); }
-  .pulse-walk-ui small { line-height: 1.35; }
-  .pulse-walk-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .3rem; }
-  .pulse-walk-ui i { padding: .45rem .4rem; font-size: .58rem; letter-spacing: .06em; border-left-width: 0; border-top: 2px solid rgba(255,255,255,.16); }
-  .pulse-walk-ui i.active { border-top-color: #ff2d55; border-left-color: transparent; }
+  .pulse-walk-ui { float: none; position: sticky; top: auto; bottom: max(.8rem, env(safe-area-inset-bottom)); width: calc(100% - 1.2rem); max-height: none; margin: -19rem .6rem 0; overflow: hidden; overscroll-behavior: contain; padding: .78rem; border-radius: .95rem; background: rgba(0,0,0,.76); box-shadow: 0 16px 48px rgba(0,0,0,.34); }
+  .pulse-walk-ui p { margin-bottom: .24rem; font-size: .56rem; letter-spacing: .14em; }
+  .pulse-walk-ui strong { font-size: clamp(1.28rem, 6.6vw, 1.8rem); line-height: .95; letter-spacing: -.015em; }
+  .pulse-walk-ui > span { margin-top: .26rem; font-size: .76rem !important; letter-spacing: .045em; }
+  .pulse-walk-ui small { display: none; }
+  .pulse-progress-rail { height: .32rem; margin-top: .62rem; }
+  .pulse-walk-steps { display: none; }
+  .pulse-walk-ui i { flex: 0 0 auto; border: 1px solid rgba(255,255,255,.12); border-left-width: 1px; border-top-width: 1px; border-radius: .5rem; padding: .42rem .55rem; font-size: .54rem; letter-spacing: .075em; }
+  .pulse-walk-ui i.active { border-color: rgba(255,45,85,.7); color: #fff; background: rgba(255,45,85,.16); }
+  .pulse-walk-ui button { margin-top: .68rem; padding: .78rem .85rem; }
   .pulse-walkthrough-trial { display: none; }
   .pulse-site-walkthrough .pulse-walk-hero { min-height: 24rem; padding-top: 2rem; }
-  .pulse-nav,
+  .pulse-nav { flex-wrap: wrap; gap: .55rem .75rem; overflow: hidden; padding: .9rem 1rem; font-size: .56rem; letter-spacing: .12em; }
+  .pulse-nav b,
+  .pulse-nav span { flex: 0 0 auto; white-space: nowrap; }
+  .pulse-nav button { display: none; }
   .atlas-nav,
   .orbit-site nav,
   .ember-hero nav { gap: .65rem; padding: 1rem; flex-wrap: wrap; }
   .pulse-nav button,
   .orbit-site nav button,
-  .ember-hero nav button { margin-left: 0; width: auto; min-width: 8.5rem; }
+  .ember-hero nav button { margin-left: 0; width: auto; min-width: max-content; padding-inline: .95rem; }
   .pulse-hero,
   .pulse-map,
   .pulse-rhythm,
@@ -690,8 +706,32 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .verdant-site header,
   .orbit-hero,
   .luma-hero { min-height: auto; gap: 1.4rem; padding-top: 2rem; padding-bottom: 3rem; align-items: start; }
-  .pulse-copy h3 { font-size: clamp(3.1rem, 17vw, 5rem); line-height: .78; }
-  .pulse-actions { display: grid; grid-template-columns: 1fr; }
+  .pulse-copy p { margin-bottom: .85rem; letter-spacing: .16em; }
+  .pulse-copy h3 { font-size: clamp(3.1rem, 13.6vw, 4.55rem); line-height: .88; letter-spacing: -.035em; max-width: 8.8ch; }
+  .pulse-actions { display: grid; grid-template-columns: 1fr; gap: 1rem; max-width: 22rem; margin-top: 1.5rem; }
+  .pulse-actions button { padding-block: 1rem; letter-spacing: .07em; }
+
+  .atlas-nav { justify-content: flex-start; align-items: flex-start; font-size: .62rem; letter-spacing: .12em; line-height: 1.55; }
+  .atlas-title h3 { font-size: clamp(3.15rem, 12.4vw, 4.8rem); line-height: .96; letter-spacing: -.035em; }
+  .atlas-title p { margin-bottom: .8rem; }
+  .atlas-title button { margin-top: 1.45rem; padding-block: 1.05rem; }
+
+  .verdant-site header { gap: 2rem; padding-top: 3rem; }
+  .verdant-site header h3 { max-width: 100%; font-size: clamp(2.85rem, 10.8vw, 4.25rem); line-height: .99; letter-spacing: -.018em; word-spacing: .04em; }
+  .verdant-site header p { margin-bottom: .9rem; }
+  .verdant-site header button { margin-top: 1.4rem; padding-inline: 1.4rem; }
+
+  .luma-hero h3 { max-width: 8.8ch; font-size: clamp(3.35rem, 12.6vw, 5rem); line-height: .96; letter-spacing: -.026em; }
+  .luma-hero p { margin-bottom: .9rem; }
+  .luma-hero button { margin-top: 1.35rem; }
+
+  .ember-hero h3 { max-width: 9.3ch; font-size: clamp(3.25rem, 12.2vw, 4.9rem); line-height: .96; letter-spacing: -.026em; }
+  .ember-hero p { margin-bottom: .75rem; letter-spacing: .16em; }
+  .ember-hero div:last-child button { margin-top: 1.25rem; }
+
+  .margin-mast h3 { font-size: clamp(3.65rem, 14vw, 5.7rem); line-height: .92; letter-spacing: -.035em; word-spacing: .04em; }
+  .margin-mast p { letter-spacing: .18em; line-height: 1.55; }
+
   .pulse-meter { position: relative; inset: auto; right: auto; top: auto; width: 100%; margin-top: 1.4rem; }
   .pulse-map span { grid-template-columns: 2.2rem 1fr; padding: .8rem; letter-spacing: .06em; }
   .pulse-zones,
@@ -737,7 +777,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .orbit-cart { margin: 1rem; padding: 1rem; }
 
   .margin-mast { gap: 1rem; padding-top: 2.5rem; }
-  .margin-mast h3 { font-size: clamp(4.2rem, 23vw, 7rem); letter-spacing: -.08em; }
+  .margin-mast h3 { font-size: clamp(3.65rem, 14vw, 5.7rem); line-height: .92; letter-spacing: -.035em; word-spacing: .04em; }
   .margin-cover { transform: rotate(.6deg); }
   .margin-lede article,
   .margin-archive aside,
@@ -749,7 +789,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
   .ember-hero { min-height: 36rem; }
   .ember-hero div:last-child { left: 1rem; right: 1rem; bottom: 2rem; max-width: none; }
-  .ember-hero h3 { font-size: clamp(3.2rem, 15vw, 5.2rem); }
+  .ember-hero h3 { max-width: 9.3ch; font-size: clamp(3.25rem, 12.2vw, 4.9rem); line-height: .96; letter-spacing: -.026em; }
   .ember-reserve { margin: 1rem 1rem 4rem; padding: 1rem; }
 
   .luma-breathe,
@@ -769,8 +809,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .site-modal { padding-left: .35rem; padding-right: .35rem; }
   .expanded-site .site-canvas section,
   .expanded-site .site-canvas header { padding-left: .85rem; padding-right: .85rem; }
-  .pulse-walk-ui { max-height: 45svh; width: calc(100% - .8rem); margin-left: .4rem; margin-right: .4rem; }
-  .pulse-walk-title h3 { font-size: clamp(2.4rem, 14vw, 4.1rem); }
+  .pulse-walk-ui { max-height: none; width: calc(100% - .8rem); margin-left: .4rem; margin-right: .4rem; }
+  .pulse-walk-title h3 { font-size: clamp(2rem, 9.5vw, 3.25rem); }
   .atlas-hero aside { grid-template-columns: 1fr; }
   .orbit-detail div div { grid-template-columns: 1fr; }
 }
