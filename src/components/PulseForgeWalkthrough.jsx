@@ -1,67 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-export const WALKTHROUGH_FRAMES = [
-  {
-    name: 'Entrance',
-    copy: 'Branded reception, concrete desk, wall mark, and first view down the training floor.',
-    src: '/brand-images/pulseforge-sequence-01-entrance.webp',
-    focus: '50% 52%',
-    startScale: 1.04,
-    endScale: 1.18,
-    panX: -1.6,
-    panY: -0.4,
-  },
-  {
-    name: 'Turf',
-    copy: 'Green sled lane, white hash marks, rubber flooring, and racks pulling into view.',
-    src: '/brand-images/pulseforge-sequence-02-turf.webp',
-    focus: '52% 50%',
-    startScale: 1.06,
-    endScale: 1.2,
-    panX: -3.1,
-    panY: -0.9,
-  },
-  {
-    name: 'Strength',
-    copy: 'Rack line, dumbbell wall, benches, plates, mirrors, and warm linear lights.',
-    src: '/brand-images/pulseforge-sequence-03-strength.webp',
-    focus: '46% 50%',
-    startScale: 1.05,
-    endScale: 1.19,
-    panX: 2.2,
-    panY: -0.7,
-  },
-  {
-    name: 'Conditioning',
-    copy: 'Rowers, assault bikes, ropes, kettlebells, and the turf lane continuing through the room.',
-    src: '/brand-images/pulseforge-sequence-04-conditioning.webp',
-    focus: '54% 50%',
-    startScale: 1.05,
-    endScale: 1.21,
-    panX: -2.5,
-    panY: -0.8,
-  },
-  {
-    name: 'Recovery',
-    copy: 'Glass partition, cold plunge, compression chairs, mobility table, and quiet reset lighting.',
-    src: '/brand-images/pulseforge-sequence-05-recovery.webp',
-    focus: '48% 52%',
-    startScale: 1.05,
-    endScale: 1.18,
-    panX: 1.8,
-    panY: -1.1,
-  },
-  {
-    name: 'Trial Pass',
-    copy: 'Final desk view, branded handoff, and the seven-day trial pass reveal.',
-    src: '/brand-images/pulseforge-sequence-06-cta.webp',
-    focus: '50% 50%',
-    startScale: 1.03,
-    endScale: 1.16,
-    panX: -1,
-    panY: -0.5,
-  },
-];
+export const PULSEFORGE_FLYTHROUGH = {
+  src: '/brand-images/pulseforge-flythrough.mp4',
+  poster: '/brand-images/pulseforge-flythrough-poster.webp',
+  duration: 12,
+  frameCount: 48,
+};
+
+const framePath = (index) => `/brand-images/pulseforge-flythrough-frames/frame-${String(index + 1).padStart(2, '0')}.webp`;
+
+export const WALKTHROUGH_FRAMES = Array.from({ length: PULSEFORGE_FLYTHROUGH.frameCount }, (_, index) => ({
+  name: 'PulseForge flythrough',
+  copy: 'Scroll-scrubbed frame from the provided PulseForge gym flythrough video.',
+  src: framePath(index),
+  focus: '50% 50%',
+}));
 
 const clamp = (value) => Math.max(0, Math.min(1, value));
 
@@ -72,7 +25,7 @@ function segmentForProgress(progress) {
   const index = Math.min(last, Math.floor(scaled));
   const nextIndex = Math.min(last, index + 1);
   const local = index === last ? 1 : scaled - index;
-  const blend = clamp((local - 0.58) / 0.42);
+  const blend = clamp((local - 0.45) / 0.55);
   return { index, nextIndex, local, blend };
 }
 
@@ -83,13 +36,13 @@ export function zoneForProgress(progress) {
 
 function frameStyle(frame, opacity, progress, local, direction = 1) {
   const travel = (local - 0.5) * direction;
-  const scale = frame.startScale + (frame.endScale - frame.startScale) * clamp(local);
+  const scale = 1.006 + progress * 0.015 + clamp(local) * 0.006;
   return {
     opacity,
     '--frame-focus': frame.focus,
     '--frame-scale': scale,
-    '--frame-x': `${frame.panX * progress + travel * 2.2}%`,
-    '--frame-y': `${frame.panY * progress + Math.sin(progress * Math.PI) * -0.9}%`,
+    '--frame-x': `${(progress - 0.5) * -0.7 + travel * 0.45}%`,
+    '--frame-y': `${Math.sin(progress * Math.PI) * -0.35}%`,
   };
 }
 
@@ -97,7 +50,7 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
   const [preloaded, setPreloaded] = useState(false);
   const [reduced, setReduced] = useState(false);
   const p = clamp(active ? scrollProgress : 0);
-  const { index, nextIndex, local, blend } = useMemo(() => segmentForProgress(p), [p]);
+  const { index, nextIndex, local, blend } = useMemo(() => segmentForProgress(reduced ? 1 : p), [p, reduced]);
   const zone = WALKTHROUGH_FRAMES[index];
   const next = WALKTHROUGH_FRAMES[nextIndex];
   const finalReveal = p > 0.88;
@@ -128,7 +81,7 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
 
   return (
     <div
-      className={`pulse-walkthrough ${preloaded ? 'is-preloaded' : 'is-loading'} ${reduced ? 'is-reduced' : ''}`}
+      className={`pulse-walkthrough ${preloaded ? 'is-preloaded' : 'is-loading'} ${reduced ? 'is-reduced' : ''} has-video-frames`}
       aria-hidden="true"
       style={{
         '--walk-progress': p,
@@ -144,7 +97,7 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
           <img src={zone.src} alt="" loading="eager" decoding="async" />
         </figure>
         {nextIndex !== index && (
-          <figure className="pulse-walkthrough-frame is-next" style={frameStyle(next, nextOpacity, p, clamp(local - 0.58), -1)}>
+          <figure className="pulse-walkthrough-frame is-next" style={frameStyle(next, nextOpacity, p, clamp(local - 0.45), -1)}>
             <img src={next.src} alt="" loading="eager" decoding="async" />
           </figure>
         )}
@@ -157,7 +110,7 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
         <span>Trial pass unlocked</span>
         <strong>Book the floor assessment</strong>
       </div>
-      {!preloaded && <div className="pulse-walkthrough-fallback"><span>Preloading gym walkthrough</span></div>}
+      {!preloaded && <div className="pulse-walkthrough-fallback"><span>Loading gym flythrough</span></div>}
     </div>
   );
 }
