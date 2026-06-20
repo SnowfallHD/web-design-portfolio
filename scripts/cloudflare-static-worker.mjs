@@ -1,5 +1,5 @@
 const RAW_BASE = 'https://raw.githubusercontent.com/SnowfallHD/web-design-portfolio/main/dist';
-const VERSION = '2a1d62f';
+const VERSION = '20260620-flythrough-dist';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -11,6 +11,7 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
   '.md': 'text/markdown; charset=utf-8',
   '.webp': 'image/webp',
+  '.mp4': 'video/mp4',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',

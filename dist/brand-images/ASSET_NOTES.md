@@ -8,7 +8,12 @@
 - `pulseforge-sequence-01-entrance.webp` through `pulseforge-sequence-06-cta.webp`
   - Source: generated specifically for this portfolio on 2026-06-18 as a coherent 2.5D fallback when no continuous fly-through video/source sequence was available in the environment.
   - Prompt intent: same premium PulseForge performance club, same palette/lens/lighting/materials/signage, moving entrance → turf lane → strength zone → conditioning zone → recovery area → trial-pass desk.
-  - Use: PulseForge scroll-scrubbed cinematic media layer. Browser code controls crossfade, zoom/pan, progress rail, labels, CTA reveal, reduced-motion, and mobile fallbacks; primitive Three.js geometry is not the realism layer.
+  - Use: fallback PulseForge scroll-scrubbed cinematic media layer if the provided video cannot load.
+
+- `pulseforge-flythrough.mp4` / `pulseforge-flythrough-poster.webp` / `pulseforge-flythrough-frames/frame-01.webp` through `frame-48.webp`
+  - Source: user-provided flythrough video attachment on 2026-06-20, optimized locally with ffmpeg for web playback: muted H.264 MP4, no audio, faststart, 12-frame keyframes for scroll seeking; additionally exported to 48 WebP frames at 4 fps for reliable scroll-scrubbed rendering.
+  - Visual content: continuous premium PulseForge-style gym flythrough, recovery bay / loaded barbells / rack lane / red flywheel wall / front desk handoff.
+  - Use: primary PulseForge sticky-scroll cinematic media layer; browser code scrubs the user-provided video-derived frame sequence from modal scroll progress, with the MP4 retained as the source media asset.
 
 - `orbit-product-*.webp`
   - Source: generated specifically for this portfolio on 2026-06-18.
