@@ -1,5 +1,5 @@
 const RAW_BASE = 'https://raw.githubusercontent.com/SnowfallHD/web-design-portfolio/main/dist';
-const VERSION = '20260620-no-poster-ghost';
+const VERSION = '20260620-no-black-flicker';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',

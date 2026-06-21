@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export const PULSEFORGE_FLYTHROUGH = {
   src: '/brand-images/pulseforge-flythrough.mp4',
@@ -22,15 +22,26 @@ const imageCache = new Map();
 
 function preloadImage(src) {
   if (!src) return Promise.resolve();
-  if (imageCache.has(src)) return imageCache.get(src);
-  const promise = new Promise((resolve) => {
+  const cached = imageCache.get(src);
+  if (cached) return cached.promise;
+
+  const record = { loaded: false, promise: null };
+  record.promise = new Promise((resolve) => {
     const img = new Image();
-    img.onload = resolve;
-    img.onerror = resolve;
+    const done = () => {
+      const markLoaded = () => {
+        record.loaded = true;
+        resolve();
+      };
+      if (img.decode) img.decode().then(markLoaded, markLoaded);
+      else markLoaded();
+    };
+    img.onload = done;
+    img.onerror = () => resolve();
     img.src = src;
   });
-  imageCache.set(src, promise);
-  return promise;
+  imageCache.set(src, record);
+  return record.promise;
 }
 
 function segmentForProgress(progress) {
@@ -102,12 +113,21 @@ function frameStyle(frame, opacity, progress, local, direction = 1) {
 export default function PulseForgeWalkthrough({ active = false, scrollProgress = 0 }) {
   const [preloaded, setPreloaded] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [activeSlot, setActiveSlot] = useState(0);
+  const [frameSlots, setFrameSlots] = useState(() => [
+    { frame: WALKTHROUGH_FRAMES[0], loaded: false },
+    { frame: null, loaded: false },
+  ]);
+  const desiredFrameRef = useRef(WALKTHROUGH_FRAMES[0].src);
+  const activeSlotRef = useRef(0);
   const targetProgress = clamp(active ? scrollProgress : 0);
   const p = useEasedProgress(targetProgress, reduced);
   const { index, nextIndex, local, blend } = useMemo(() => segmentForProgress(reduced ? 1 : p), [p, reduced]);
   const zone = WALKTHROUGH_FRAMES[index];
   const next = WALKTHROUGH_FRAMES[nextIndex];
   const finalReveal = p > 0.88;
+
+  useEffect(() => { activeSlotRef.current = activeSlot; }, [activeSlot]);
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -125,35 +145,67 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
     });
 
     let warmIndex = 36;
-    const schedule = window.requestIdleCallback
-      ? (cb) => window.requestIdleCallback(cb, { timeout: 450 })
-      : (cb) => window.setTimeout(cb, 90);
-    const cancel = window.cancelIdleCallback || window.clearTimeout;
     let warmHandle = 0;
     const warmRest = () => {
       if (cancelled || warmIndex >= WALKTHROUGH_FRAMES.length) return;
-      const batch = WALKTHROUGH_FRAMES.slice(warmIndex, warmIndex + 12);
+      const batch = WALKTHROUGH_FRAMES.slice(warmIndex, warmIndex + 48);
       warmIndex += batch.length;
       batch.forEach((frame) => preloadImage(frame.src));
-      warmHandle = schedule(warmRest);
+      warmHandle = window.setTimeout(warmRest, 24);
     };
-    warmHandle = schedule(warmRest);
+    warmHandle = window.setTimeout(warmRest, 24);
 
     return () => {
       cancelled = true;
-      if (warmHandle) cancel(warmHandle);
+      if (warmHandle) window.clearTimeout(warmHandle);
     };
   }, []);
 
-  useEffect(() => {
-    const start = Math.max(0, index - 10);
-    const end = Math.min(WALKTHROUGH_FRAMES.length, index + 28);
-    WALKTHROUGH_FRAMES.slice(start, end).forEach((frame) => preloadImage(frame.src));
-  }, [index]);
+  const promoteLoadedSlot = useCallback((slotIndex, frame, imageEl) => {
+    const promote = () => {
+      setFrameSlots((slots) => {
+        const nextSlots = [...slots];
+        if (nextSlots[slotIndex]?.frame?.src === frame.src) {
+          nextSlots[slotIndex] = { frame, loaded: true };
+        }
+        return nextSlots;
+      });
 
-  const hasNext = nextIndex !== index;
-  const currentOpacity = 1;
-  const nextOpacity = reduced || !hasNext ? 0 : blend;
+      if (desiredFrameRef.current === frame.src) {
+        activeSlotRef.current = slotIndex;
+        setActiveSlot(slotIndex);
+      }
+    };
+
+    if (imageEl?.decode) imageEl.decode().then(promote, promote);
+    else promote();
+  }, []);
+
+  useEffect(() => {
+    desiredFrameRef.current = zone.src;
+    preloadImage(zone.src);
+    if (next?.src) preloadImage(next.src);
+
+    const start = Math.max(0, index - 10);
+    const end = Math.min(WALKTHROUGH_FRAMES.length, index + 80);
+    WALKTHROUGH_FRAMES.slice(start, end).forEach((frame) => preloadImage(frame.src));
+
+    const active = frameSlots[activeSlot];
+    if (active?.frame?.src === zone.src) return;
+
+    const inactiveSlot = activeSlot === 0 ? 1 : 0;
+    const inactive = frameSlots[inactiveSlot];
+    if (inactive?.frame?.src === zone.src) {
+      if (inactive.loaded) setActiveSlot(inactiveSlot);
+      return;
+    }
+
+    setFrameSlots((slots) => {
+      const nextSlots = [...slots];
+      nextSlots[inactiveSlot] = { frame: zone, loaded: false };
+      return nextSlots;
+    });
+  }, [activeSlot, frameSlots, index, next?.src, zone]);
 
   return (
     <div
@@ -178,14 +230,27 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
             decoding="async"
           />
         )}
-        <figure className="pulse-walkthrough-frame is-current" style={frameStyle(zone, currentOpacity, p, local, 1)}>
-          <img src={zone.src} alt="" loading="eager" decoding="async" />
-        </figure>
-        {nextIndex !== index && (
-          <figure className="pulse-walkthrough-frame is-next" style={frameStyle(next, nextOpacity, p, local, -1)}>
-            <img src={next.src} alt="" loading="eager" decoding="async" />
-          </figure>
-        )}
+        {frameSlots.map(({ frame, loaded }, slotIndex) => {
+          if (!frame) return null;
+          const isActive = slotIndex === activeSlot;
+          const opacity = isActive && loaded ? 1 : 0;
+          return (
+            <figure
+              key={slotIndex}
+              className={`pulse-walkthrough-frame ${isActive ? 'is-current' : 'is-buffer'}`}
+              data-loaded={loaded ? 'true' : 'false'}
+              style={frameStyle(frame, opacity, p, isActive ? local : blend, isActive ? 1 : -1)}
+            >
+              <img
+                src={frame.src}
+                alt=""
+                loading="eager"
+                decoding="async"
+                onLoad={(event) => promoteLoadedSlot(slotIndex, frame, event.currentTarget)}
+              />
+            </figure>
+          );
+        })}
       </div>
       <div className="pulse-walkthrough-depth depth-a" />
       <div className="pulse-walkthrough-depth depth-b" />
