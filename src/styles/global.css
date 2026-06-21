@@ -223,7 +223,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .pulse-walkthrough-poster { opacity: 1; transition: opacity .18s ease; }
 .pulse-walkthrough-poster.is-hidden { opacity: 0; }
 .pulse-walkthrough-poster.is-static { inset: 0; width: 100%; height: 100%; opacity: 1; transform: scale(1.015); }
-.pulse-walkthrough-frame { position: absolute; inset: -4%; margin: 0; overflow: hidden; background: #050507; will-change: opacity, transform; transition: opacity .08s linear; }
+.pulse-walkthrough-frame { position: absolute; inset: -4%; margin: 0; overflow: hidden; background: #050507; will-change: opacity, transform; transition: opacity .04s linear; }
+.pulse-walkthrough.has-smooth-frames .pulse-walkthrough-frame { transition: none; }
 .pulse-walkthrough-frame img { width: 100%; height: 100%; object-fit: cover; object-position: var(--frame-focus); transform: translate3d(var(--frame-x), var(--frame-y), 0) scale(var(--frame-scale)); transform-origin: 50% 52%; filter: saturate(1.04) contrast(1.07) brightness(.82); will-change: transform; }
 .pulse-walkthrough-media::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(circle at 58% 48%, transparent 0 28%, rgba(0,0,0,.08) 42%, rgba(0,0,0,.55) 100%), linear-gradient(90deg, rgba(0,0,0,.42), transparent 28%, transparent 70%, rgba(0,0,0,.48)), linear-gradient(0deg, rgba(0,0,0,.36), transparent 45%, rgba(0,0,0,.2)); }
 .pulse-walkthrough.has-video-frames .pulse-walkthrough-frame img { filter: saturate(1.08) contrast(1.08) brightness(1.03); }
