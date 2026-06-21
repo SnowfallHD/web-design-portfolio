@@ -152,7 +152,7 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
   }, [index]);
 
   const hasNext = nextIndex !== index;
-  const currentOpacity = reduced || !hasNext ? 1 : 1 - blend;
+  const currentOpacity = 1;
   const nextOpacity = reduced || !hasNext ? 0 : blend;
 
   return (
@@ -169,13 +169,15 @@ export default function PulseForgeWalkthrough({ active = false, scrollProgress =
       }}
     >
       <div className="pulse-walkthrough-media">
-        <img
-          className={`pulse-walkthrough-poster is-static ${preloaded ? 'is-hidden' : ''}`}
-          src={PULSEFORGE_FLYTHROUGH.poster}
-          alt=""
-          loading="eager"
-          decoding="async"
-        />
+        {!preloaded && (
+          <img
+            className="pulse-walkthrough-poster is-static"
+            src={PULSEFORGE_FLYTHROUGH.poster}
+            alt=""
+            loading="eager"
+            decoding="async"
+          />
+        )}
         <figure className="pulse-walkthrough-frame is-current" style={frameStyle(zone, currentOpacity, p, local, 1)}>
           <img src={zone.src} alt="" loading="eager" decoding="async" />
         </figure>

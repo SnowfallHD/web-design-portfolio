@@ -1,5 +1,5 @@
 const RAW_BASE = 'https://raw.githubusercontent.com/SnowfallHD/web-design-portfolio/main/dist';
-const VERSION = '20260620-smooth-flythrough';
+const VERSION = '20260620-no-poster-ghost';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
